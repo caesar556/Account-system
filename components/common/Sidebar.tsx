@@ -14,38 +14,38 @@ import {
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "#",
+    title: "الرئيسية",
+    url: "/dashboard",
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
+    title: "المخزون",
+    url: "/inventory",
+    icon: Calendar, // Using Calendar as placeholder or replace with appropriate
   },
   {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
+    title: "العملاء",
+    url: "/customers",
     icon: Search,
   },
   {
-    title: "Settings",
-    url: "#",
+    title: "المدفوعات",
+    url: "/payments",
+    icon: Settings,
+  },
+  {
+    title: "التقارير",
+    url: "/reports",
     icon: Settings,
   },
 ]
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar side="right">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>التطبيق</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
