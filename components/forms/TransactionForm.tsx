@@ -61,13 +61,13 @@ export default function AddTransactionForm() {
                   <SelectItem value="IN">
                     <div className="flex items-center gap-2 text-green-600 font-medium">
                       <ArrowUpCircle className="h-4 w-4" />
-                      <span>وارد (داخل)</span>
+                      <span>وارد</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="OUT">
                     <div className="flex items-center gap-2 text-red-600 font-medium">
                       <ArrowDownCircle className="h-4 w-4" />
-                      <span>صادر (خارج)</span>
+                      <span>صادر</span>
                     </div>
                   </SelectItem>
                 </SelectContent>

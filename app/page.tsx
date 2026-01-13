@@ -20,13 +20,11 @@ import { Button } from "@/components/ui/button";
 export default async function Home() {
   await dbConnect();
 
-  // Initialize treasury if none exists (for dev/demo)
   let treasury = await Treasury.findOne();
   if (!treasury) {
     treasury = await Treasury.create({ name: "الخزينة الرئيسية", currency: "EGP" });
   }
 
-  // Fetch summary data from DB
   const transactions = await CashTransaction.find().sort({ createdAt: -1 }).limit(8);
   const allTransactions = await CashTransaction.find();
 
@@ -43,7 +41,6 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-slate-50/50 p-4 md:p-8 space-y-8 animate-in fade-in duration-700" dir="rtl">
       
-      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
