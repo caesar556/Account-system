@@ -1,7 +1,23 @@
 "use client";
 
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Wallet, 
+  Plus, 
+  History, 
+  Filter, 
+  Download,
+  Search,
+  MoreVertical,
+  Banknote,
+  ArrowUpRight,
+  ArrowDownRight
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -10,175 +26,197 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
 import AddTransactionForm from "@/components/forms/TransactionForm";
-import { 
-  ArrowDownCircle, 
-  ArrowUpCircle, 
-  Banknote, 
-  Calendar, 
-  ChevronRight, 
-  Download, 
-  Filter, 
-  History, 
-  Plus, 
-  TrendingDown, 
-  TrendingUp, 
-  Wallet 
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
-export default function TreasuryPage() {
+export default function TreasuryMain() {
   return (
-    <div className="space-y-8 p-4 md:p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
-      
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
+    <div className="flex flex-col gap-8 p-4 md:p-8 max-w-7xl mx-auto">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">إدارة الخزينة</h1>
-          <p className="text-muted-foreground">متابعة وإدارة الحركات النقدية والتدفقات المالية</p>
+          <p className="text-muted-foreground mt-1">مراقبة السيولة النقدية والتدفقات المالية اليومية</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2 border-dashed">
             <Download className="h-4 w-4" />
-            تصدير
+            <span className="hidden sm:inline">تصدير التقارير</span>
+            <span className="sm:hidden">تصدير</span>
           </Button>
-          <Button size="sm" className="gap-2 bg-violet-600 hover:bg-violet-700">
+          <Button className="gap-2 bg-violet-600 hover:bg-violet-700 text-white">
             <Plus className="h-4 w-4" />
-            معاملة جديدة
+            <span>معاملة جديدة</span>
           </Button>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card className="relative overflow-hidden border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow">
+      {/* Summary Statistics */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="shadow-sm border-r-4 border-r-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المقبوضات</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <div className="p-2 bg-green-50 rounded-full">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">25,000.00</div>
+            <div className="text-2xl font-bold text-green-700">25,000.00 ر.س</div>
             <p className="text-xs text-muted-foreground mt-1">
-              +12% من الشهر الماضي
+              +12.5% منذ الشهر الماضي
             </p>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-shadow">
+        <Card className="shadow-sm border-r-4 border-r-red-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المدفوعات</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <CardTitle className="text-sm font-medium">إجمالي المصروفات</CardTitle>
+            <div className="p-2 bg-red-50 rounded-full">
+              <TrendingDown className="h-4 w-4 text-red-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">8,500.00</div>
+            <div className="text-2xl font-bold text-red-700">8,500.00 ر.س</div>
             <p className="text-xs text-muted-foreground mt-1">
-              -5% من الشهر الماضي
+              -4.2% منذ الشهر الماضي
             </p>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-l-4 border-l-violet-500 shadow-md bg-violet-50/50 hover:shadow-lg transition-shadow">
+        <Card className="shadow-sm border-r-4 border-r-violet-500 bg-violet-50/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الرصيد الحالي</CardTitle>
-            <Wallet className="h-4 w-4 text-violet-500" />
+            <CardTitle className="text-sm font-medium text-violet-900">الرصيد المتوفر</CardTitle>
+            <div className="p-2 bg-violet-100 rounded-full">
+              <Wallet className="h-4 w-4 text-violet-600" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-violet-700">16,500.00</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              رصيد الخزينة المتوفر
+            <div className="text-2xl font-bold text-violet-700">16,500.00 ر.س</div>
+            <p className="text-xs text-violet-600/70 mt-1">
+              سيولة نقدية جاهزة
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Layout */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-        
-        {/* Left Side: Add Form */}
-        <div className="lg:col-span-4 lg:sticky lg:top-8">
-          <AddTransactionForm />
+      <div className="grid gap-8 lg:grid-cols-12">
+        {/* Left Column: Form Section */}
+        <div className="lg:col-span-4">
+          <div className="sticky top-8 space-y-6">
+             <AddTransactionForm />
+             
+             {/* Quick Links Card */}
+             <Card className="hidden lg:block border-dashed">
+                <CardHeader>
+                  <CardTitle className="text-sm">روابط سريعة</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-2">
+                   <Button variant="ghost" className="justify-start text-xs h-8">تحميل كشف حساب</Button>
+                   <Button variant="ghost" className="justify-start text-xs h-8">إغلاق الصندوق اليومي</Button>
+                   <Button variant="ghost" className="justify-start text-xs h-8 text-red-600 hover:text-red-700 hover:bg-red-50">تبليغ عن خطأ</Button>
+                </CardContent>
+             </Card>
+          </div>
         </div>
 
-        {/* Right Side: Transactions List */}
-        <div className="lg:col-span-8 space-y-4">
-          <Card className="shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <div>
+        {/* Right Column: Transactions Table */}
+        <div className="lg:col-span-8">
+          <Card className="shadow-sm">
+            <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 pb-6">
+              <div className="space-y-1">
                 <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5 text-muted-foreground" />
-                  أحدث المعاملات
+                  <History className="h-5 w-5 text-violet-600" />
+                  سجل العمليات
                 </CardTitle>
-                <CardDescription>آخر 10 حركات تمت على الخزينة</CardDescription>
+                <CardDescription>عرض أحدث الحركات المالية في النظام</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                <Filter className="h-3.5 w-3.5" />
-                تصفية
-              </Button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="بحث..." className="w-full sm:w-[200px] pr-9 h-9" />
+                </div>
+                <Button variant="outline" size="sm" className="h-9 gap-1">
+                  <Filter className="h-3.5 w-3.5" />
+                  <span>تصفية</span>
+                </Button>
+              </div>
             </CardHeader>
-
+            <Separator />
             <CardContent className="p-0">
-              <div className="rounded-md border-t">
+              <div className="overflow-x-auto">
                 <Table dir="rtl">
-                  <TableHeader className="bg-muted/50">
+                  <TableHeader className="bg-muted/30">
                     <TableRow>
-                      <TableHead className="w-[100px] text-right font-bold">النوع</TableHead>
-                      <TableHead className="text-right font-bold">المبلغ</TableHead>
-                      <TableHead className="text-right font-bold hidden md:table-cell">الوصف</TableHead>
-                      <TableHead className="text-right font-bold">طريقة الدفع</TableHead>
-                      <TableHead className="text-left font-bold">التاريخ</TableHead>
+                      <TableHead className="w-[120px] text-right">الحالة</TableHead>
+                      <TableHead className="text-right">القيمة</TableHead>
+                      <TableHead className="text-right">البيان / الوصف</TableHead>
+                      <TableHead className="text-right hidden md:table-cell">الوسيلة</TableHead>
+                      <TableHead className="text-left">التوقيت</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
-
                   <TableBody>
-                    <TableRow className="hover:bg-muted/30 transition-colors">
+                    {/* Sample Entry 1 */}
+                    <TableRow className="hover:bg-muted/20 transition-colors cursor-default">
                       <TableCell>
-                        <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 gap-1 hover:bg-green-100">
-                          <Plus className="h-3 w-3" />
-                          داخل
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1.5 px-2.5 py-0.5">
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                          إيداع
                         </Badge>
                       </TableCell>
                       <TableCell className="font-bold text-green-600">10,000.00</TableCell>
-                      <TableCell className="text-muted-foreground hidden md:table-cell">دفعة مقدمة من عميل</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-                          كاش
+                      <TableCell className="max-w-[200px] truncate font-medium">دفعة مقدمة - مشروع الفلاح</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Wallet className="h-3.5 w-3.5" />
+                          نقدي
                         </div>
                       </TableCell>
-                      <TableCell className="text-left text-xs text-muted-foreground font-mono">2026-01-13</TableCell>
+                      <TableCell className="text-left text-xs text-muted-foreground font-mono">13 Jan, 10:30 AM</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
 
-                    <TableRow className="hover:bg-muted/30 transition-colors">
+                    {/* Sample Entry 2 */}
+                    <TableRow className="hover:bg-muted/20 transition-colors cursor-default">
                       <TableCell>
-                        <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700 gap-1 hover:bg-red-100">
-                          <TrendingDown className="h-3 w-3" />
-                          خارج
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1.5 px-2.5 py-0.5">
+                          <ArrowDownRight className="h-3.5 w-3.5" />
+                          صرف
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-bold text-red-600">1,500.00</TableCell>
-                      <TableCell className="text-muted-foreground hidden md:table-cell">مصاريف نقل وتوريد</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Banknote className="h-3.5 w-3.5 text-muted-foreground" />
-                          تحويل
+                      <TableCell className="font-bold text-red-600">1,200.00</TableCell>
+                      <TableCell className="max-w-[200px] truncate font-medium">فواتير كهرباء وصيانة</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <Banknote className="h-3.5 w-3.5" />
+                          تحويل بنكي
                         </div>
                       </TableCell>
-                      <TableCell className="text-left text-xs text-muted-foreground font-mono">2026-01-13</TableCell>
+                      <TableCell className="text-left text-xs text-muted-foreground font-mono">12 Jan, 04:15 PM</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </div>
-              
-              <div className="p-4 border-t text-center">
-                <Button variant="link" size="sm" className="text-violet-600 gap-1">
-                  عرض كافة المعاملات
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
             </CardContent>
+            <Separator />
+            <div className="p-4 flex items-center justify-between">
+               <p className="text-xs text-muted-foreground">عرض 2 من أصل 48 عملية</p>
+               <div className="flex gap-2">
+                 <Button variant="outline" size="sm" disabled className="h-8 text-xs">السابق</Button>
+                 <Button variant="outline" size="sm" className="h-8 text-xs">التالي</Button>
+               </div>
+            </div>
           </Card>
         </div>
-
       </div>
     </div>
   );
