@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const CashTransactionSchema = new mongoose.Schema(
   {
+    treasuryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Treasury",
+      required: true,
+    },
+
     type: {
       type: String,
       enum: ["IN", "OUT"],

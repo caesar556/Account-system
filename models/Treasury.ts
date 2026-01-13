@@ -10,6 +10,10 @@ const TreasurySchema = new mongoose.Schema(
       type: String,
       default: "EGP",
     },
+    balance: {
+      type: Number,
+      default: 0,
+    },
     minBalance: {
       type: Number,
       default: 0,
