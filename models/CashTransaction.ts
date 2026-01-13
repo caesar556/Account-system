@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 
 const CashTransactionSchema = new mongoose.Schema(
   {
-    treasuryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Treasury",
-      required: true,
-    },
-
     type: {
       type: String,
       enum: ["IN", "OUT"],
@@ -23,12 +17,12 @@ const CashTransactionSchema = new mongoose.Schema(
     reason: {
       type: String,
       enum: [
-        "DEAL_PAYMENT",   
-        "EXPENSE",       
-        "WITHDRAW",       
-        "DEPOSIT",       
-        "ADJUSTMENT", 
-        "OTHER"
+        "DEAL_PAYMENT",
+        "EXPENSE",
+        "WITHDRAW",
+        "DEPOSIT",
+        "ADJUSTMENT",
+        "OTHER",
       ],
       required: true,
     },
@@ -54,14 +48,8 @@ const CashTransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       default: null,
     },
-
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const CashTransaction =
