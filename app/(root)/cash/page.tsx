@@ -1,4 +1,4 @@
-import AddTransactionForm from "@/components/forms/Transaction form";
+import AddTransactionForm from "@/components/forms/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -58,6 +58,7 @@ export default function TreasuryPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <AddTransactionForm />
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>

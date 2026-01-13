@@ -1,31 +1,19 @@
 import { z } from "zod";
 
 export const transactionSchema = z.object({
-  type: z.enum(["IN", "OUT"], {
-    errorMap: (issue, ctx) => {
-      if (issue.code === z.ZodIssueCode.invalid_type && issue.received === "undefined") {
-        return { message: "نوع الحركة مطلوب" };
-      }
-      return { message: ctx.defaultError };
-    },
+  type: z.string().refine((val) => val === "IN" || val === "OUT", {
+    message: "نوع الحركة مطلوب",
   }),
 
-  amount: z.coerce
-    .number({
-      invalid_type_error: "المبلغ لازم يكون رقم",
-    })
-    .positive("المبلغ لازم يكون أكبر من صفر"),
+  amount: z.coerce.number().positive("المبلغ لازم يكون أكبر من صفر"),
 
   description: z.string().min(3, "الوصف قصير جدًا").max(200, "الوصف طويل"),
 
-  method: z.enum(["CASH", "TRANSFER", "CHEQUE"], {
-    errorMap: (issue, ctx) => {
-      if (issue.code === z.ZodIssueCode.invalid_type && issue.received === "undefined") {
-        return { message: "طريقة الدفع مطلوبة" };
-      }
-      return { message: ctx.defaultError };
-    },
-  }),
+  method: z
+    .string()
+    .refine((val) => ["CASH", "TRANSFER", "CHEQUE"].includes(val), {
+      message: "طريقة الدفع مطلوبة",
+    }),
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;
