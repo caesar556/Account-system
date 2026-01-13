@@ -1,5 +1,4 @@
-"use client";
-
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import { createTransaction } from "@/app/(root)/cash/actions";
 import { 
   ArrowDownCircle, 
@@ -25,14 +24,43 @@ import {
   Wallet 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 const initialState = {
   success: false,
   errors: {} as Record<string, string[]>,
 };
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      disabled={pending}
+      className="w-full h-12 text-lg font-bold bg-violet-600 hover:bg-violet-700 shadow-md transition-all active:scale-95"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+          جاري الحفظ...
+        </>
+      ) : (
+        "حفظ المعاملة"
+      )}
+    </Button>
+  );
+}
+
 export default function AddTransactionForm() {
   const [state, formAction] = useFormState(createTransaction, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.success) {
+      formRef.current?.reset();
+    }
+  }, [state.success]);
 
   return (
     <Card className="w-full shadow-lg border-2" dir="rtl">
@@ -47,13 +75,13 @@ export default function AddTransactionForm() {
       </CardHeader>
 
       <CardContent className="pt-6">
-        <form action={formAction} className="space-y-6">
+        <form ref={formRef} action={formAction} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
                 نوع المعاملة
               </Label>
-              <Select name="type">
+              <Select name="type" required>
                 <SelectTrigger className="h-11">
                   <SelectValue placeholder="اختر النوع" />
                 </SelectTrigger>
@@ -87,9 +115,11 @@ export default function AddTransactionForm() {
                   id="amount"
                   name="amount"
                   type="number"
+                  step="0.01"
                   placeholder="0.00"
                   className="pl-10 h-11 text-lg font-semibold"
-                  min={1}
+                  min={0.01}
+                  required
                 />
               </div>
               {state.errors?.amount && (
@@ -109,6 +139,7 @@ export default function AddTransactionForm() {
                 name="description"
                 placeholder="اكتب تفاصيل المعاملة هنا..."
                 className="pl-10 h-11"
+                required
               />
             </div>
             {state.errors?.description && (
@@ -169,12 +200,7 @@ export default function AddTransactionForm() {
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full h-12 text-lg font-bold bg-violet-600 hover:bg-violet-700 shadow-md transition-all active:scale-95"
-          >
-            حفظ المعاملة
-          </Button>
+          <SubmitButton />
         </form>
       </CardContent>
     </Card>
