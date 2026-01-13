@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,19 +9,19 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import Link from "next/link";
 
-// Menu items.
 const items = [
   {
     title: "الرئيسية",
-    url: "/dashboard",
+    url: "/",
     icon: Home,
   },
   {
-    title: "المخزون",
-    url: "/inventory",
-    icon: Calendar, // Using Calendar as placeholder or replace with appropriate
+    title: "الخزنة",
+    url: "/cash",
+    icon: Calendar,
   },
   {
     title: "العملاء",
@@ -38,23 +38,26 @@ const items = [
     url: "/reports",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
   return (
     <Sidebar side="right">
-      <SidebarContent>
+      <SidebarContent className="bg-gray-800  text-white">
         <SidebarGroup>
-          <SidebarGroupLabel>التطبيق</SidebarGroupLabel>
+          <SidebarGroupLabel className="flex gap-2 justify-center items-center mb-6 text-xl font-bold">
+            <h2 className="text-gray-200" >لوحة التحكم </h2>
+            <span className="text-gray-200 text-sm "> (إدارة النظام) </span>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem className="mb-6" key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -63,5 +66,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

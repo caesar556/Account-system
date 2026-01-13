@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/common/Sidebar";
+import { AppSidebar } from "@/components/layout/Sidebar";
 
 export default function RootLayout({
   children,
