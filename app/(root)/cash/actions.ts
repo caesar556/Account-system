@@ -23,7 +23,14 @@ export async function createTransaction(
     method: formData.get("method"),
   };
 
-  const validatedFields = transactionSchema.safeParse(rawData);
+  // Convert amount to number for Zod coercion if it's a string
+  const amountStr = formData.get("amount");
+  const processedData = {
+    ...rawData,
+    amount: amountStr ? parseFloat(amountStr as string) : undefined,
+  };
+
+  const validatedFields = transactionSchema.safeParse(processedData);
 
   if (!validatedFields.success) {
     return {
