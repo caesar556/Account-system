@@ -49,13 +49,14 @@ export default function AddTransactionForm() {
   const [error, setError] = useState<string | null>(null);
   const [treasuries, setTreasuries] = useState<any[]>([]);
 
-  const form = useForm<TransactionInput>({
+  const form = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "IN",
       amount: 0,
       description: "",
       method: "CASH",
+      reason: "OTHER",
       treasuryId: "",
       
     },
