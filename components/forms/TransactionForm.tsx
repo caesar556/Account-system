@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -45,13 +45,13 @@ import {
 } from "lucide-react";
 
 export default function AddTransactionForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [treasuries, setTreasuries] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [treasuries, setTreasuries] = React.useState<any[]>([]);
 
   const form = useForm<TransactionInput>({
-    resolver: zodResolver(transactionSchema),
+    resolver: zodResolver(transactionSchema) as any,
     defaultValues: {
       type: "IN",
       amount: 0,
@@ -61,7 +61,7 @@ export default function AddTransactionForm() {
     },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchTreasuries() {
       try {
         const res = await fetch("/api/treasuries");
