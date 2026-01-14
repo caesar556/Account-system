@@ -29,7 +29,6 @@ const CashTransactionSchema = new mongoose.Schema(
         "ADJUSTMENT",
         "OTHER",
       ],
-      required: true,
     },
 
     description: {
