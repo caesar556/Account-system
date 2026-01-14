@@ -33,7 +33,8 @@ import Status from "./Status";
 import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
 
 export default function TreasuryMain() {
-  const { } = useGetTransactionsQuery();
+  const { data: transactions, isLoading } = useGetTransactionsQuery();
+
   return (
     <div className="flex flex-col gap-8 p-4 md:p-6 max-w-7xl mx-auto">
       <HeaderSection />
@@ -93,38 +94,62 @@ export default function TreasuryMain() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* Sample Entry 1 */}
-                    <TableRow className="hover:bg-muted/20 transition-colors cursor-default">
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-50 text-green-700 border-green-200 gap-1.5 px-2.5 py-0.5"
-                        >
-                          <ArrowUpRight className="h-3.5 w-3.5" />
-                          إيداع
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-bold text-green-600">
-                        10,000.00
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate font-medium">
-                        دفعة مقدمة - مشروع الفلاح
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Wallet className="h-3.5 w-3.5" />
-                          نقدي
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-left text-xs text-muted-foreground font-mono">
-                        13 Jan, 10:30 AM
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                          جاري تحميل البيانات...
+                        </TableCell>
+                      </TableRow>
+                    ) : transactions?.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                          لا توجد عمليات مسجلة
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      transactions?.map((tx: any) => (
+                        <TableRow key={tx._id} className="hover:bg-muted/20 transition-colors cursor-default">
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={`${
+                                tx.type === "income" 
+                                  ? "bg-green-50 text-green-700 border-green-200" 
+                                  : "bg-red-50 text-red-700 border-red-200"
+                              } gap-1.5 px-2.5 py-0.5`}
+                            >
+                              <ArrowUpRight className={`h-3.5 w-3.5 ${tx.type === "expense" ? "rotate-90" : ""}`} />
+                              {tx.type === "income" ? "إيداع" : "سحب"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className={`font-bold ${tx.type === "income" ? "text-green-600" : "text-red-600"}`}>
+                            {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate font-medium">
+                            {tx.description}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                              <Wallet className="h-3.5 w-3.5" />
+                              {tx.paymentMethod === "cash" ? "نقدي" : "بنكي"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-left text-xs text-muted-foreground font-mono">
+                            {new Date(tx.createdAt).toLocaleString('en-GB', { 
+                              day: '2-digit', 
+                              month: 'short', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -132,7 +157,7 @@ export default function TreasuryMain() {
             <Separator />
             <div className="p-4 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                عرض 2 من أصل 48 عملية
+                عرض {transactions?.length || 0} عملية
               </p>
               <div className="flex gap-2">
                 <Button
