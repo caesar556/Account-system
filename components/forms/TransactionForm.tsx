@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +18,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { createTransaction } from "@/app/(root)/cash/actions";
 import {
   ArrowDownCircle,
@@ -31,11 +31,15 @@ import {
   PlusCircle,
   Wallet,
 } from "lucide-react";
-import { useEffect } from "react";
 
-const initialState = {
+interface ActionState {
+  success: boolean;
+  errors?: Record<string, string[]>;
+}
+
+const initialState: ActionState = {
   success: false,
-  errors: {} as Record<string, string[]>,
+  errors: {},
 };
 
 function SubmitButton() {
@@ -60,14 +64,40 @@ function SubmitButton() {
 }
 
 export default function AddTransactionForm() {
-  const [state, formAction] = useFormState(createTransaction, initialState);
+  const [state, setState] = useState<ActionState>(initialState);
+  const [treasuries, setTreasuries] = useState<any[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.success) {
-      formRef.current?.reset();
+    async function fetchTreasuries() {
+      try {
+        const res = await fetch("/api/treasuries");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setTreasuries(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch treasuries", err);
+      }
     }
-  }, [state.success]);
+    fetchTreasuries();
+  }, []);
+
+  async function handleSubmit(formData: FormData) {
+    try {
+      const result = await createTransaction(state, formData);
+      setState(result);
+      if (result.success) {
+        formRef.current?.reset();
+      }
+    } catch (err) {
+      console.error(err);
+      setState({
+        success: false,
+        errors: { _form: ["حدث خطأ غير متوقع"] }
+      });
+    }
+  }
 
   return (
     <Card className="w-full shadow-lg border-2" dir="rtl">
@@ -82,7 +112,11 @@ export default function AddTransactionForm() {
       </CardHeader>
 
       <CardContent className="pt-6">
-        <form ref={formRef} action={formAction} className="space-y-6">
+        <form
+          ref={formRef}
+          action={handleSubmit}
+          className="space-y-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">نوع المعاملة</Label>
@@ -157,9 +191,11 @@ export default function AddTransactionForm() {
               </p>
             )}
           </div>
+
           <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">الخزنة</Label>
             <Select name="treasuryId" required>
-              <SelectTrigger>
+              <SelectTrigger className="h-11">
                 <SelectValue placeholder="اختر الخزنة" />
               </SelectTrigger>
               <SelectContent>
@@ -170,6 +206,11 @@ export default function AddTransactionForm() {
                 ))}
               </SelectContent>
             </Select>
+            {state.errors?.treasuryId && (
+              <p className="text-xs font-medium text-destructive">
+                {state.errors.treasuryId[0]}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
