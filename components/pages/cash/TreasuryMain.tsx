@@ -40,10 +40,13 @@ import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
 
 export default function TreasuryMain() {
   const {
-    data: transactions,
+    data,
     isLoading,
     isError,
   } = useGetTransactionsQuery();
+
+  const transactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
+  const total = Array.isArray(data) ? (data as any[]).length : (data as any)?.total || transactions.length;
 
   if (isLoading) {
     return (
@@ -126,7 +129,7 @@ export default function TreasuryMain() {
                   </TableHeader>
 
                   <TableBody>
-                    {data?.transactions.length === 0 && (
+                    {transactions.length === 0 && (
                       <TableRow>
                         <TableCell
                           colSpan={6}
@@ -137,7 +140,7 @@ export default function TreasuryMain() {
                       </TableRow>
                     )}
 
-                    {data?.transactions.map((tx) => (
+                    {transactions.map((tx: any) => (
                       <TableRow
                         key={tx._id}
                         className="hover:bg-muted/20 transition-colors"
@@ -207,7 +210,7 @@ export default function TreasuryMain() {
 
             <div className="p-4 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                عرض {data.transactions.length} من أصل {data.total} عملية
+                عرض {transactions.length} من أصل {total} عملية
               </p>
 
               <div className="flex gap-2">
