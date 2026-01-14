@@ -30,8 +30,10 @@ import { Separator } from "@/components/ui/separator";
 import AddTransactionForm from "@/components/forms/TransactionForm";
 import HeaderSection from "./HeaderSection";
 import Status from "./Status";
+import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
 
 export default function TreasuryMain() {
+  const { } = useGetTransactionsQuery();
   return (
     <div className="flex flex-col gap-8 p-4 md:p-6 max-w-7xl mx-auto">
       <HeaderSection />
