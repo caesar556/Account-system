@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect} from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -44,10 +45,10 @@ import {
 } from "lucide-react";
 
 export default function AddTransactionForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [treasuries, setTreasuries] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [treasuries, setTreasuries] = React.useState<any[]>([]);
 
   const form = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema) as any,
@@ -60,7 +61,7 @@ export default function AddTransactionForm() {
     },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchTreasuries() {
       try {
         const res = await fetch("/api/treasuries");
@@ -118,83 +119,59 @@ export default function AddTransactionForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="flex items-center gap-1.5">
-                      نوع المعاملة
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="اختر النوع" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="IN">
-                          <div className="flex items-center gap-2 text-green-600 font-medium">
-                            <ArrowUpCircle className="h-4 w-4" />
-                            <span>وارد</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="OUT">
-                          <div className="flex items-center gap-2 text-red-600 font-medium">
-                            <ArrowDownCircle className="h-4 w-4" />
-                            <span>صادر</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-xs font-medium" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }: { field: any }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="flex items-center gap-1.5">
-                      المبلغ
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Banknote className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-10 h-11 text-lg font-semibold"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage className="text-xs font-medium" />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
-              name="description"
+              name="type"
               render={({ field }: { field: any }) => (
                 <FormItem className="space-y-2">
                   <FormLabel className="flex items-center gap-1.5">
-                    الوصف / البيان
+                    نوع المعاملة
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="اختر النوع" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="IN">
+                        <div className="flex items-center gap-2 text-green-600 font-medium">
+                          <ArrowUpCircle className="h-4 w-4" />
+                          <span>وارد</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="OUT">
+                        <div className="flex items-center gap-2 text-red-600 font-medium">
+                          <ArrowDownCircle className="h-4 w-4" />
+                          <span>صادر</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs font-medium" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }: { field: any }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    المبلغ
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Banknote className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                       <Input
-                        placeholder="اكتب تفاصيل المعاملة هنا..."
-                        className="pl-10 h-11"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="pl-10 h-11 text-lg font-semibold"
                         {...field}
                       />
                     </div>
@@ -203,79 +180,103 @@ export default function AddTransactionForm() {
                 </FormItem>
               )}
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="treasuryId"
-              render={({ field }: { field: any }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel className="flex items-center gap-1.5">
-                    الخزنة
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder="اختر الخزنة" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {treasuries.map((t) => (
-                        <SelectItem key={t._id} value={t._id}>
-                          {t.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs font-medium" />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }: { field: any }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="flex items-center gap-1.5">
+                  الوصف / البيان
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      placeholder="اكتب تفاصيل المعاملة هنا..."
+                      className="pl-10 h-11"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage className="text-xs font-medium" />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="method"
-              render={({ field }: { field: any }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel className="flex items-center gap-1.5">
-                    طريقة الدفع
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-11">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="CASH">
-                        <div className="flex items-center gap-2">
-                          <Wallet className="h-4 w-4 text-orange-500" />
-                          <span>نقدي (كاش)</span>
-                        </div>
+          <FormField
+            control={form.control}
+            name="treasuryId"
+            render={({ field }: { field: any }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="flex items-center gap-1.5">
+                  الخزنة
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="اختر الخزنة" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {treasuries.map((t) => (
+                      <SelectItem key={t._id} value={t._id}>
+                        {t.name}
                       </SelectItem>
-                      <SelectItem value="TRANSFER">
-                        <div className="flex items-center gap-2">
-                          <Banknote className="h-4 w-4 text-blue-500" />
-                          <span>تحويل بنكي</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="CHEQUE">
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-purple-500" />
-                          <span>شيك</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs font-medium" />
-                </FormItem>
-              )}
-            />
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-xs font-medium" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="method"
+            render={({ field }: { field: any }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="flex items-center gap-1.5">
+                  طريقة الدفع
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="CASH">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-orange-500" />
+                        <span>نقدي (كاش)</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="TRANSFER">
+                      <div className="flex items-center gap-2">
+                        <Banknote className="h-4 w-4 text-blue-500" />
+                        <span>تحويل بنكي</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="CHEQUE">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-purple-500" />
+                        <span>شيك</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-xs font-medium" />
+              </FormItem>
+            )}
+          />
 
             {error && (
               <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
