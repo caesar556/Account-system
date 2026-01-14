@@ -18,7 +18,7 @@ export const transactionSchema = z.object({
       "ADJUSTMENT",
       "OTHER",
     ])
-    .optional(),
+    .default("OTHER"),
 
   treasuryId: z.string().min(1, "الخزينة مطلوبة"),
 });

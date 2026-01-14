@@ -159,6 +159,39 @@ export default function AddTransactionForm() {
 
               <FormField
                 control={form.control}
+                name="reason"
+                render={({ field }: { field: any }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      السبب
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="اختر السبب" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="DEAL_PAYMENT">دفعة صفقة</SelectItem>
+                        <SelectItem value="EXPENSE">مصروفات</SelectItem>
+                        <SelectItem value="WITHDRAW">سحب</SelectItem>
+                        <SelectItem value="DEPOSIT">إيداع</SelectItem>
+                        <SelectItem value="ADJUSTMENT">تسوية</SelectItem>
+                        <SelectItem value="OTHER">أخرى</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs font-medium" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="amount"
                 render={({ field }: { field: any }) => (
                   <FormItem className="space-y-2">
