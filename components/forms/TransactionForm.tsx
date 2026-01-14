@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,8 +20,18 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useFormStatus } from "react-dom";
-import { createTransaction } from "@/app/(root)/cash/actions";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  transactionSchema,
+  type TransactionInput,
+} from "@/lib/validation/transaction";
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -32,41 +44,22 @@ import {
   Wallet,
 } from "lucide-react";
 
-interface ActionState {
-  success: boolean;
-  errors?: Record<string, string[]>;
-}
-
-const initialState: ActionState = {
-  success: false,
-  errors: {},
-};
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button
-      type="submit"
-      disabled={pending}
-      className="w-full h-12 text-lg font-bold bg-violet-600 hover:bg-violet-700 shadow-md transition-all active:scale-95"
-    >
-      {pending ? (
-        <>
-          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-          جاري الحفظ...
-        </>
-      ) : (
-        "حفظ المعاملة"
-      )}
-    </Button>
-  );
-}
-
 export default function AddTransactionForm() {
-  const [state, setState] = useState<ActionState>(initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [treasuries, setTreasuries] = useState<any[]>([]);
-  const formRef = useRef<HTMLFormElement>(null);
+
+  const form = useForm<TransactionInput>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      type: "IN",
+      amount: 0,
+      description: "",
+      method: "CASH",
+      treasuryId: "",
+    },
+  });
 
   useEffect(() => {
     async function fetchTreasuries() {
@@ -83,19 +76,30 @@ export default function AddTransactionForm() {
     fetchTreasuries();
   }, []);
 
-  async function handleSubmit(formData: FormData) {
+  async function onSubmit(data: TransactionInput) {
+    setIsSubmitting(true);
+    setSuccess(false);
+    setError(null);
     try {
-      const result = await createTransaction(state, formData);
-      setState(result);
-      if (result.success) {
-        formRef.current?.reset();
-      }
-    } catch (err) {
-      console.error(err);
-      setState({
-        success: false,
-        errors: { _form: ["حدث خطأ غير متوقع"] }
+      const response = await fetch("/api/transactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "فشل في حفظ المعاملة");
+      }
+
+      setSuccess(true);
+      form.reset();
+    } catch (err: any) {
+      setError(err.message || "حدث خطأ غير متوقع");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -112,160 +116,201 @@ export default function AddTransactionForm() {
       </CardHeader>
 
       <CardContent className="pt-6">
-        <form
-          ref={formRef}
-          action={handleSubmit}
-          className="space-y-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">نوع المعاملة</Label>
-              <Select name="type" required>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="اختر النوع" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IN">
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                      <ArrowUpCircle className="h-4 w-4" />
-                      <span>وارد</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="OUT">
-                    <div className="flex items-center gap-2 text-red-600 font-medium">
-                      <ArrowDownCircle className="h-4 w-4" />
-                      <span>صادر</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {state.errors?.type && (
-                <p className="text-xs font-medium text-destructive">
-                  {state.errors.type[0]}
-                </p>
-              )}
-            </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      نوع المعاملة
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="اختر النوع" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="IN">
+                          <div className="flex items-center gap-2 text-green-600 font-medium">
+                            <ArrowUpCircle className="h-4 w-4" />
+                            <span>وارد</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="OUT">
+                          <div className="flex items-center gap-2 text-red-600 font-medium">
+                            <ArrowDownCircle className="h-4 w-4" />
+                            <span>صادر</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs font-medium" />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="amount" className="flex items-center gap-1.5">
-                المبلغ
-              </Label>
-              <div className="relative">
-                <Banknote className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="pl-10 h-11 text-lg font-semibold"
-                  min={0.01}
-                  required
-                />
-              </div>
-              {state.errors?.amount && (
-                <p className="text-xs font-medium text-destructive">
-                  {state.errors.amount[0]}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description" className="flex items-center gap-1.5">
-              الوصف / البيان
-            </Label>
-            <div className="relative">
-              <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-              <Input
-                id="description"
-                name="description"
-                placeholder="اكتب تفاصيل المعاملة هنا..."
-                className="pl-10 h-11"
-                required
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      المبلغ
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Banknote className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="pl-10 h-11 text-lg font-semibold"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-xs font-medium" />
+                  </FormItem>
+                )}
               />
             </div>
-            {state.errors?.description && (
-              <p className="text-xs font-medium text-destructive">
-                {state.errors.description[0]}
-              </p>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    الوصف / البيان
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="اكتب تفاصيل المعاملة هنا..."
+                        className="pl-10 h-11"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage className="text-xs font-medium" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="treasuryId"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    الخزنة
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="اختر الخزنة" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {treasuries.map((t) => (
+                        <SelectItem key={t._id} value={t._id}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs font-medium" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="method"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="flex items-center gap-1.5">
+                    طريقة الدفع
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="CASH">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="h-4 w-4 text-orange-500" />
+                          <span>نقدي (كاش)</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="TRANSFER">
+                        <div className="flex items-center gap-2">
+                          <Banknote className="h-4 w-4 text-blue-500" />
+                          <span>تحويل بنكي</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="CHEQUE">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 text-purple-500" />
+                          <span>شيك</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs font-medium" />
+                </FormItem>
+              )}
+            />
+
+            {error && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                <p className="text-sm font-medium text-destructive text-center">
+                  {error}
+                </p>
+              </div>
             )}
-          </div>
 
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">الخزنة</Label>
-            <Select name="treasuryId" required>
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="اختر الخزنة" />
-              </SelectTrigger>
-              <SelectContent>
-                {treasuries.map((t) => (
-                  <SelectItem key={t._id} value={t._id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {state.errors?.treasuryId && (
-              <p className="text-xs font-medium text-destructive">
-                {state.errors.treasuryId[0]}
-              </p>
+            {success && (
+              <div className="p-3 rounded-md bg-green-50 border border-green-200 flex items-center justify-center gap-2">
+                <Check className="h-4 w-4 text-green-600" />
+                <p className="text-sm font-medium text-green-700">
+                  تم حفظ المعاملة بنجاح
+                </p>
+              </div>
             )}
-          </div>
 
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">طريقة الدفع</Label>
-            <Select name="method" defaultValue="CASH">
-              <SelectTrigger className="h-11">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CASH">
-                  <div className="flex items-center gap-2">
-                    <Wallet className="h-4 w-4 text-orange-500" />
-                    <span>نقدي (كاش)</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="TRANSFER">
-                  <div className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-blue-500" />
-                    <span>تحويل بنكي</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="CHEQUE">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-purple-500" />
-                    <span>شيك</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {state.errors?.method && (
-              <p className="text-xs font-medium text-destructive">
-                {state.errors.method[0]}
-              </p>
-            )}
-          </div>
-
-          {state.errors?._form && (
-            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
-              <p className="text-sm font-medium text-destructive text-center">
-                {state.errors._form[0]}
-              </p>
-            </div>
-          )}
-
-          {state.success && (
-            <div className="p-3 rounded-md bg-green-50 border border-green-200 flex items-center justify-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
-              <p className="text-sm font-medium text-green-700">
-                تم حفظ المعاملة بنجاح
-              </p>
-            </div>
-          )}
-
-          <SubmitButton />
-        </form>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-12 text-lg font-bold bg-violet-600 hover:bg-violet-700 shadow-md transition-all active:scale-95"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                "حفظ المعاملة"
+              )}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
