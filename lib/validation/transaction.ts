@@ -14,6 +14,19 @@ export const transactionSchema = z.object({
     .refine((val) => ["CASH", "TRANSFER", "CHEQUE"].includes(val), {
       message: "طريقة الدفع مطلوبة",
     }),
+
+  reason: z.enum([
+    "DEAL_PAYMENT",
+    "EXPENSE",
+    "WITHDRAW",
+    "DEPOSIT",
+    "ADJUSTMENT",
+    "OTHER",
+  ], {
+    errorMap: () => ({ message: "سبب الحركة مطلوب" }),
+  }),
+
+  treasuryId: z.string().min(1, "الخزينة مطلوبة"),
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;

@@ -18,19 +18,14 @@ export async function createTransaction(
 
   const rawData = {
     type: formData.get("type"),
-    amount: Number(formData.get("amount")),
+    amount: formData.get("amount"),
     description: formData.get("description"),
     method: formData.get("method"),
+    reason: formData.get("reason"),
     treasuryId: formData.get("treasuryId"),
   };
 
-  const amountStr = formData.get("amount");
-  const processedData = {
-    ...rawData,
-    amount: amountStr ? parseFloat(amountStr as string) : undefined,
-  };
-
-  const validatedFields = transactionSchema.safeParse(processedData);
+  const validatedFields = transactionSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
     return {
