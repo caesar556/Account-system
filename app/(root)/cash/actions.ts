@@ -48,12 +48,14 @@ export async function createTransaction(
     return {
       success: true,
     };
-  } catch {
+  } catch(err) {
+    console.log("error", err);
     return {
       success: false,
       errors: {
         _form: ["خطأ غير متوقع أثناء حفظ الحركة"],
       },
+      
     };
   }
 }
