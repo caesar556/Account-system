@@ -7,7 +7,6 @@ const CashTransactionSchema = new mongoose.Schema(
       ref: "Treasury",
       required: true,
     },
-
     type: {
       type: String,
       enum: ["IN", "OUT"],

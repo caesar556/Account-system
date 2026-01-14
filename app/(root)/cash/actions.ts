@@ -18,12 +18,12 @@ export async function createTransaction(
 
   const rawData = {
     type: formData.get("type"),
-    amount: formData.get("amount"),
+    amount: Number(formData.get("amount")),
     description: formData.get("description"),
     method: formData.get("method"),
+    treasuryId: formData.get("treasuryId"),
   };
 
-  // Convert amount to number for Zod coercion if it's a string
   const amountStr = formData.get("amount");
   const processedData = {
     ...rawData,
@@ -42,9 +42,7 @@ export async function createTransaction(
   try {
     const data = validatedFields.data;
 
-    const amount = data.type === "OUT" ? -Math.abs(data.amount) : data.amount;
-
-    await CashTransaction.create({ ...data, amount });
+    await CashTransaction.create(data);
     revalidatePath("/cash");
 
     return {

@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +11,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useFormState, useFormStatus } from "react-dom";
 import { createTransaction } from "@/app/(root)/cash/actions";
-import { 
-  ArrowDownCircle, 
-  ArrowUpCircle, 
-  Banknote, 
-  Check, 
-  CreditCard, 
-  FileText, 
-  Loader2, 
-  PlusCircle, 
-  Wallet 
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Banknote,
+  Check,
+  CreditCard,
+  FileText,
+  Loader2,
+  PlusCircle,
+  Wallet,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 
 const initialState = {
@@ -78,9 +85,7 @@ export default function AddTransactionForm() {
         <form ref={formRef} action={formAction} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                نوع المعاملة
-              </Label>
+              <Label className="flex items-center gap-1.5">نوع المعاملة</Label>
               <Select name="type" required>
                 <SelectTrigger className="h-11">
                   <SelectValue placeholder="اختر النوع" />
@@ -101,7 +106,9 @@ export default function AddTransactionForm() {
                 </SelectContent>
               </Select>
               {state.errors?.type && (
-                <p className="text-xs font-medium text-destructive">{state.errors.type[0]}</p>
+                <p className="text-xs font-medium text-destructive">
+                  {state.errors.type[0]}
+                </p>
               )}
             </div>
 
@@ -123,7 +130,9 @@ export default function AddTransactionForm() {
                 />
               </div>
               {state.errors?.amount && (
-                <p className="text-xs font-medium text-destructive">{state.errors.amount[0]}</p>
+                <p className="text-xs font-medium text-destructive">
+                  {state.errors.amount[0]}
+                </p>
               )}
             </div>
           </div>
@@ -148,11 +157,23 @@ export default function AddTransactionForm() {
               </p>
             )}
           </div>
+          <div className="space-y-2">
+            <Select name="treasuryId" required>
+              <SelectTrigger>
+                <SelectValue placeholder="اختر الخزنة" />
+              </SelectTrigger>
+              <SelectContent>
+                {treasuries.map((t) => (
+                  <SelectItem key={t._id} value={t._id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">
-              طريقة الدفع
-            </Label>
+            <Label className="flex items-center gap-1.5">طريقة الدفع</Label>
             <Select name="method" defaultValue="CASH">
               <SelectTrigger className="h-11">
                 <SelectValue />
@@ -179,7 +200,9 @@ export default function AddTransactionForm() {
               </SelectContent>
             </Select>
             {state.errors?.method && (
-              <p className="text-xs font-medium text-destructive">{state.errors.method[0]}</p>
+              <p className="text-xs font-medium text-destructive">
+                {state.errors.method[0]}
+              </p>
             )}
           </div>
 
