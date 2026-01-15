@@ -64,13 +64,12 @@ export default async function Home() {
           <Link href="/cash">
             <Button className="bg-violet-600 hover:bg-violet-700 gap-2 h-11 px-6 text-lg font-bold shadow-lg shadow-violet-200 transition-all active:scale-95">
               <PlusCircle className="h-5 w-5" />
-              إضافة حركة جديدة
+              أختر الخزينة
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card className="border-none shadow-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white overflow-hidden relative group transition-all hover:translate-y-[-4px]">
           <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
@@ -142,12 +141,10 @@ export default async function Home() {
         </Card>
       </div>
 
-      {/* Charts Section */}
       <div className="animate-in slide-in-from-bottom duration-1000 delay-200">
         <DashboardCharts inflow={totalIn} outflow={totalOut} />
       </div>
 
-      {/* Recent Activity */}
       <Card className="shadow-lg border-none ring-1 ring-slate-200 animate-in slide-in-from-bottom duration-1000 delay-300">
         <CardHeader className="flex flex-row items-center justify-between pb-6 border-b mx-6 px-0">
           <div>
