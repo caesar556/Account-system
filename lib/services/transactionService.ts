@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Treasury } from "@/models/Treasury";
 import { CashTransaction } from "@/models/CashTransaction";
 
-export async function createCashTransaction(data) {
+export async function createCashTransaction(data: any) {
   const session = await mongoose.startSession();
 
   try {

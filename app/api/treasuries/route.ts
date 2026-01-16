@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     const treasury = await Treasury.create(body);
-    return NextResponse.json(treasury, { status: 21 });
+    return NextResponse.json(treasury, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
