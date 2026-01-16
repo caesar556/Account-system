@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Wallet,
   History,
@@ -7,6 +8,8 @@ import {
   Search,
   MoreVertical,
   ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -35,6 +38,7 @@ import { Separator } from "@/components/ui/separator";
 import AddTransactionForm from "@/components/forms/TransactionForm";
 import HeaderSection from "./HeaderSection";
 import Status from "./Status";
+import { formatDate } from "@/lib/utils";
 
 import {
   useGetTransactionsQuery,
@@ -49,9 +53,27 @@ export default function TreasuryMain() {
   } = useGetTransactionsQuery();
 
   const [deleteTransaction] = useDeleteTransactionMutation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const transactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
-  const total = Array.isArray(data) ? (data as any[]).length : (data as any)?.total || transactions.length;
+  const rawTransactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
+  
+  // Search filtering
+  const filteredTransactions = rawTransactions.filter((tx: any) => 
+    tx.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    tx.amount?.toString().includes(searchTerm) ||
+    tx.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalItems = filteredTransactions.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  // Pagination
+  const transactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleDelete = async (id: string) => {
     if (confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
@@ -108,7 +130,12 @@ export default function TreasuryMain() {
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="بحث..."
+                    placeholder="بحث في العمليات..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
                     className="w-full sm:w-[200px] pr-9 h-9"
                   />
                 </div>
@@ -148,9 +175,9 @@ export default function TreasuryMain() {
                       <TableRow>
                         <TableCell
                           colSpan={6}
-                          className="text-center text-muted-foreground"
+                          className="text-center text-muted-foreground h-24"
                         >
-                          لا توجد عمليات مسجلة
+                          {searchTerm ? "لا توجد نتائج تطابق بحثك" : "لا توجد عمليات مسجلة"}
                         </TableCell>
                       </TableRow>
                     )}
@@ -170,7 +197,7 @@ export default function TreasuryMain() {
                                 : "bg-red-50 text-red-700 border-red-200"
                             }
                           >
-                            <ArrowUpRight className="h-3.5 w-3.5" />
+                            <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
                             {tx.type === "IN" ? "إيداع" : "سحب"}
                           </Badge>
                         </TableCell>
@@ -195,13 +222,13 @@ export default function TreasuryMain() {
                         <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <Wallet className="h-3.5 w-3.5" />
-                            {tx.method}
+                            {tx.method === "CASH" ? "نقدي" : tx.method === "TRANSFER" ? "تحويل" : "شيك"}
                           </div>
                         </TableCell>
 
                         {/* Date */}
                         <TableCell className="text-left text-xs text-muted-foreground font-mono">
-                          {new Date(tx.createdAt).toLocaleString("en-GB")}
+                          {formatDate(tx.createdAt)}
                         </TableCell>
 
                         {/* Actions */}
@@ -226,24 +253,29 @@ export default function TreasuryMain() {
 
             <div className="p-4 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                عرض {transactions.length} من أصل {total} عملية
+                عرض {transactions.length} من أصل {totalItems} عملية
               </p>
 
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled
-                  className="h-8 text-xs"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 text-xs gap-1"
                 >
+                  <ChevronRight className="h-4 w-4" />
                   السابق
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="h-8 text-xs gap-1"
                 >
                   التالي
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
               </div>
             </div>
