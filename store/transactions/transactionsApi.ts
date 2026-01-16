@@ -13,7 +13,7 @@ export const transactionsApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Transactions", "Treasury"],
+      invalidatesTags: ["Transactions", "Treasury", "Analytics"],
     }),
 
     deleteTransaction: builder.mutation<void, string>({
@@ -21,7 +21,7 @@ export const transactionsApi = apiSlice.injectEndpoints({
         url: `/transactions/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Transactions", "Treasury"],
+      invalidatesTags: ["Transactions", "Treasury", "Analytics"],
     }),
   }),
 });

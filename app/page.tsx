@@ -142,7 +142,7 @@ export default async function Home() {
       </div>
 
       <div className="animate-in slide-in-from-bottom duration-1000 delay-200">
-        <DashboardCharts inflow={totalIn} outflow={totalOut} />
+        <DashboardCharts />
       </div>
 
       <Card className="shadow-lg border-none ring-1 ring-slate-200 animate-in slide-in-from-bottom duration-1000 delay-300">

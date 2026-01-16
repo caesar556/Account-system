@@ -55,7 +55,7 @@ export default function TreasuryMain() {
   const [deleteTransaction] = useDeleteTransactionMutation();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 2;
 
   const rawTransactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
   
