@@ -1,7 +1,23 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
 
 export default function Status() {
+  const { data: transactions = [] } = useGetTransactionsQuery();
+
+  const totals = transactions.reduce(
+    (acc: any, tx: any) => {
+      if (tx.type === "IN") acc.in += tx.amount;
+      if (tx.type === "OUT") acc.out += tx.amount;
+      return acc;
+    },
+    { in: 0, out: 0 }
+  );
+
+  const balance = totals.in - totals.out;
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card className="shadow-sm border-r-4 border-r-green-500">
@@ -14,9 +30,11 @@ export default function Status() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-700">25,000.00 ر.س</div>
+          <div className="text-2xl font-bold text-green-700">
+            {totals.in.toLocaleString("ar-EG")} ر.س
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
-            +12.5% منذ الشهر الماضي
+            إجمالي المبالغ الواردة
           </p>
         </CardContent>
       </Card>
@@ -31,9 +49,11 @@ export default function Status() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-700">8,500.00 ر.س</div>
+          <div className="text-2xl font-bold text-red-700">
+            {totals.out.toLocaleString("ar-EG")} ر.س
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
-            -4.2% منذ الشهر الماضي
+            إجمالي المبالغ الصادرة
           </p>
         </CardContent>
       </Card>
@@ -49,7 +69,7 @@ export default function Status() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-violet-700">
-            16,500.00 ر.س
+            {balance.toLocaleString("ar-EG")} ر.س
           </div>
           <p className="text-xs text-violet-600/70 mt-1">سيولة نقدية جاهزة</p>
         </CardContent>
