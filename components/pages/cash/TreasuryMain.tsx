@@ -36,7 +36,10 @@ import AddTransactionForm from "@/components/forms/TransactionForm";
 import HeaderSection from "./HeaderSection";
 import Status from "./Status";
 
-import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
+import {
+  useGetTransactionsQuery,
+  useDeleteTransactionMutation,
+} from "@/store/transactions/transactionsApi";
 
 export default function TreasuryMain() {
   const {
@@ -45,8 +48,20 @@ export default function TreasuryMain() {
     isError,
   } = useGetTransactionsQuery();
 
+  const [deleteTransaction] = useDeleteTransactionMutation();
+
   const transactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
   const total = Array.isArray(data) ? (data as any[]).length : (data as any)?.total || transactions.length;
+
+  const handleDelete = async (id: string) => {
+    if (confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
+      try {
+        await deleteTransaction(id).unwrap();
+      } catch (err) {
+        console.error("Failed to delete transaction", err);
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -194,9 +209,10 @@ export default function TreasuryMain() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDelete(tx._id)}
                           >
-                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>

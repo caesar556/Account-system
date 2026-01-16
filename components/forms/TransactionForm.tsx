@@ -32,6 +32,10 @@ import {
   type TransactionInput,
 } from "@/lib/validation/transaction";
 import {
+  useCreateTransactionMutation,
+} from "@/store/transactions/transactionsApi";
+import { useGetTreasuriesQuery } from "@/store/treasuries/treasuriesApi";
+import {
   ArrowDownCircle,
   ArrowUpCircle,
   Banknote,
@@ -44,10 +48,11 @@ import {
 } from "lucide-react";
 
 export default function AddTransactionForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createTransaction, { isLoading: isSubmitting }] = useCreateTransactionMutation();
+  const { data: treasuriesData } = useGetTreasuriesQuery();
+  const treasuries = treasuriesData || [];
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [treasuries, setTreasuries] = useState<any[]>([]);
 
   const form = useForm({
     resolver: zodResolver(transactionSchema),
@@ -58,49 +63,18 @@ export default function AddTransactionForm() {
       method: "CASH",
       reason: "OTHER",
       treasuryId: "",
-      
     },
   });
 
-  useEffect(() => {
-    async function fetchTreasuries() {
-      try {
-        const res = await fetch("/api/treasuries");
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setTreasuries(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch treasuries", err);
-      }
-    }
-    fetchTreasuries();
-  }, []);
-
   async function onSubmit(data: TransactionInput) {
-    setIsSubmitting(true);
     setSuccess(false);
     setError(null);
     try {
-      const response = await fetch("/api/transactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "فشل في حفظ المعاملة");
-      }
-
+      await createTransaction(data).unwrap();
       setSuccess(true);
       form.reset();
     } catch (err: any) {
-      setError(err.message || "حدث خطأ غير متوقع");
-    } finally {
-      setIsSubmitting(false);
+      setError(err?.data?.error || err.message || "حدث خطأ غير متوقع");
     }
   }
 

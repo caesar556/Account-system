@@ -17,6 +17,10 @@ author = "agent"
 task = "workflow.run"
 args = "dev-server-v2"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "dev-server-v3"
+
 [[workflows.workflow]]
 name = "dev-server-v2"
 author = "agent"
@@ -28,6 +32,18 @@ outputType = "webview"
 task = "shell.exec"
 args = "npm run dev -- --port 5000 --hostname 0.0.0.0"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "dev-server-v3"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [[ports]]
 localPort = 3000
