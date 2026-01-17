@@ -42,6 +42,15 @@ export async function createCashTransaction(data: any) {
         // When we RECEIVE money (IN) from a customer, their debt (balance) decreases.
         // When we PAY money (OUT) to a customer, their debt (balance) increases.
         const balanceChange = data.type === "IN" ? -data.amount : data.amount;
+        
+        // Enforce Credit Limit for debt increases
+        if (balanceChange > 0 && customer.creditLimit > 0) {
+          const projectedBalance = customer.balance + balanceChange;
+          if (projectedBalance > customer.creditLimit) {
+            throw new Error(`العملية مرفوضة: العميل تجاوز الحد الائتماني المسموح به (${customer.creditLimit})`);
+          }
+        }
+
         customer.balance += balanceChange;
         
         // Auto-update status based on balance
