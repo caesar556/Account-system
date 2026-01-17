@@ -24,7 +24,10 @@ export const customersApi = apiSlice.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Customers", id }, "Customers"],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Customers", id },
+        "Customers",
+      ],
     }),
     deleteCustomer: builder.mutation<any, string>({
       query: (id) => ({

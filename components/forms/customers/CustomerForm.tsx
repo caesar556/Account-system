@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -24,19 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-const customerSchema = z.object({
-  name: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل"),
-  phone: z.string().optional(),
-  email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
-  address: z.string().optional(),
-  creditLimit: z.coerce.number().min(0, "الحد الائتماني لا يمكن أن يكون أقل من صفر").default(0),
-  status: z.enum(["paid", "unpaid"]).default("unpaid"),
-  category: z.enum(["regular", "vip", "wholesale"]).default("regular"),
-  notes: z.string().optional(),
-});
-
-type CustomerFormValues = z.infer<typeof customerSchema>;
+import { CustomerFormValues, customerSchema } from "@/lib/validation/customer";
 
 interface CustomerFormProps {
   onSuccess?: () => void;
@@ -71,16 +58,26 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4" dir="rtl">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 pt-4"
+        dir="rtl"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">اسم العميل *</FormLabel>
+                <FormLabel className="text-sm font-semibold">
+                  اسم العميل *
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="أدخل اسم العميل بالكامل" className="h-10" {...field} />
+                  <Input
+                    placeholder="أدخل اسم العميل بالكامل"
+                    className="h-10"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -91,9 +88,15 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">رقم الهاتف</FormLabel>
+                <FormLabel className="text-sm font-semibold">
+                  رقم الهاتف
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="01xxxxxxxxx" className="h-10" {...field} />
+                  <Input
+                    placeholder="01xxxxxxxxx"
+                    className="h-10"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -107,9 +110,16 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">البريد الإلكتروني</FormLabel>
+                <FormLabel className="text-sm font-semibold">
+                  البريد الإلكتروني
+                </FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="example@mail.com" className="h-10" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="example@mail.com"
+                    className="h-10"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -120,7 +130,9 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             name="creditLimit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">الحد الائتماني (ج.م)</FormLabel>
+                <FormLabel className="text-sm font-semibold">
+                  الحد الائتماني (ج.م)
+                </FormLabel>
                 <FormControl>
                   <Input type="number" className="h-10" {...field} />
                 </FormControl>
@@ -136,16 +148,21 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">حالة الدفع</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel className="text-sm font-semibold">
+                  حالة الدفع
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger className="h-10">
                       <SelectValue placeholder="اختر الحالة" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="paid">خالص (مدفوع)</SelectItem>
                     <SelectItem value="unpaid">عليه مديونية</SelectItem>
+                    <SelectItem value="paid">خالص (مدفوع)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -157,8 +174,13 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-semibold">تصنيف العميل</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel className="text-sm font-semibold">
+                  تصنيف العميل
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger className="h-10">
                       <SelectValue placeholder="اختر التصنيف" />
@@ -183,7 +205,11 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             <FormItem>
               <FormLabel className="text-sm font-semibold">العنوان</FormLabel>
               <FormControl>
-                <Input placeholder="أدخل العنوان بالتفصيل" className="h-10" {...field} />
+                <Input
+                  placeholder="أدخل العنوان بالتفصيل"
+                  className="h-10"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -195,12 +221,14 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-semibold">ملاحظات إضافية</FormLabel>
+              <FormLabel className="text-sm font-semibold">
+                ملاحظات إضافية
+              </FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="أي تفاصيل أو ملاحظات خاصة بالعميل..." 
-                  className="min-h-[100px] resize-none" 
-                  {...field} 
+                <Textarea
+                  placeholder="أي تفاصيل أو ملاحظات خاصة بالعميل..."
+                  className="min-h-[100px] resize-none"
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -209,7 +237,11 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
         />
 
         <div className="flex justify-end gap-3 pt-6 border-t">
-          <Button type="submit" disabled={isLoading} className="w-full md:w-32 h-10 text-base font-medium">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full md:w-32 h-10 text-base font-medium"
+          >
             {isLoading ? (
               <>
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />

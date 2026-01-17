@@ -35,6 +35,7 @@ import {
   useCreateTransactionMutation,
 } from "@/store/transactions/transactionsApi";
 import { useGetTreasuriesQuery } from "@/store/treasuries/treasuriesApi";
+import { useGetCustomersQuery } from "@/store/customers/customersApi";
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -44,13 +45,16 @@ import {
   FileText,
   Loader2,
   PlusCircle,
+  User,
   Wallet,
 } from "lucide-react";
 
 export default function AddTransactionForm() {
   const [createTransaction, { isLoading: isSubmitting }] = useCreateTransactionMutation();
   const { data: treasuriesData } = useGetTreasuriesQuery();
+  const { data: customersData } = useGetCustomersQuery();
   const treasuries = treasuriesData || [];
+  const customers = customersData || [];
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +67,7 @@ export default function AddTransactionForm() {
       method: "CASH",
       reason: "OTHER",
       treasuryId: "",
+      customerId: "",
     },
   });
 
@@ -213,35 +218,69 @@ export default function AddTransactionForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="treasuryId"
-              render={({ field }: { field: any }) => (
-                <FormItem className="space-y-2">
-                  <FormLabel className="flex items-center gap-1.5">
-                    الخزنة
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder="اختر الخزنة" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {treasuries.map((t) => (
-                        <SelectItem key={t._id} value={t._id}>
-                          {t.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs font-medium" />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="treasuryId"
+                render={({ field }: { field: any }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      الخزنة
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="اختر الخزنة" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {treasuries.map((t) => (
+                          <SelectItem key={t._id} value={t._id}>
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs font-medium" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customerId"
+                render={({ field }: { field: any }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="flex items-center gap-1.5">
+                      <User className="h-4 w-4" />
+                      العميل (اختياري)
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="اختر العميل" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">بدون عميل</SelectItem>
+                        {customers.map((c) => (
+                          <SelectItem key={c._id} value={c._id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs font-medium" />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
