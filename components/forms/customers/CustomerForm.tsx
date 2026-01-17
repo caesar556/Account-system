@@ -57,7 +57,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       category: "regular",
       notes: "",
     },
-  });
+  } as any);
 
   async function onSubmit(data: CustomerFormValues) {
     try {
