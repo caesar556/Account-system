@@ -13,11 +13,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CustomerForm } from "@/components/forms/customers/CustomerForm";
 import { useGetCustomersQuery } from "@/store/customers/customersApi";
 import { Loader2, Plus, Search } from "lucide-react";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
   const { data: customers = [], isLoading, error } = useGetCustomersQuery();
 
   const filteredCustomers = customers.filter((c) =>
@@ -45,9 +54,19 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">العملاء</h1>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" /> إضافة عميل جديد
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" /> إضافة عميل جديد
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="text-right">إضافة عميل جديد للنظام</DialogTitle>
+            </DialogHeader>
+            <CustomerForm onSuccess={() => setOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search and Stats Grid */}
