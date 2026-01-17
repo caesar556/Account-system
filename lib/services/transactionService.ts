@@ -38,13 +38,19 @@ export async function createCashTransaction(data: any) {
     if (effectiveCustomerId) {
       const customer = await Customer.findById(effectiveCustomerId).session(session);
       if (customer) {
-        // For IN (money received from customer), decrease their balance (they owe less)
-        // For OUT (money paid to customer), increase their balance (they owe more)
-        if (data.type === "IN") {
-          customer.balance -= data.amount;
+        // Financial Logic:
+        // When we RECEIVE money (IN) from a customer, their debt (balance) decreases.
+        // When we PAY money (OUT) to a customer, their debt (balance) increases.
+        const balanceChange = data.type === "IN" ? -data.amount : data.amount;
+        customer.balance += balanceChange;
+        
+        // Auto-update status based on balance
+        if (customer.balance <= 0) {
+          customer.status = "paid";
         } else {
-          customer.balance += data.amount;
+          customer.status = "unpaid";
         }
+        
         await customer.save({ session });
       }
     }

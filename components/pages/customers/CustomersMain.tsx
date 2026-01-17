@@ -174,6 +174,7 @@ export default function CustomersPage() {
                                   : "text-slate-500"
                             }`}
                           >
+                            {customer.balance > 0 ? "مدين: " : customer.balance < 0 ? "دائن: " : ""}
                             {Math.abs(customer.balance).toLocaleString()} ج.م
                           </span>
                           <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">
