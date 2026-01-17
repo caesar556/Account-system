@@ -42,6 +42,18 @@ const CustomerSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    status: {
+      type: String,
+      enum: ["paid", "unpaid"],
+      default: "unpaid",
+    },
+
+    category: {
+      type: String,
+      enum: ["regular", "vip", "wholesale"],
+      default: "regular",
+    },
   },
   { timestamps: true }
 );
