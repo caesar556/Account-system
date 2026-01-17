@@ -21,12 +21,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CustomerForm } from "@/components/forms/customers/CustomerForm";
+import { CustomerStatement } from "./CustomerStatement";
 import { useGetCustomersQuery } from "@/store/customers/customersApi";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search, FileText } from "lucide-react";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<{ id: string, name: string } | null>(null);
   const { data: customers = [], isLoading, error } = useGetCustomersQuery();
 
   const filteredCustomers = customers.filter((c) =>
@@ -225,8 +227,10 @@ export default function CustomersPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 px-3 font-semibold hover:bg-primary hover:text-primary-foreground border-primary/20 transition-all"
+                          className="h-8 px-3 font-semibold hover:bg-primary hover:text-primary-foreground border-primary/20 transition-all gap-1"
+                          onClick={() => setSelectedCustomer({ id: customer._id || customer.id, name: customer.name })}
                         >
+                          <FileText className="h-3.5 w-3.5" />
                           التفاصيل
                         </Button>
                       </TableCell>
@@ -249,6 +253,15 @@ export default function CustomersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {selectedCustomer && (
+        <CustomerStatement
+          customerId={selectedCustomer.id}
+          customerName={selectedCustomer.name}
+          open={!!selectedCustomer}
+          onOpenChange={(open) => !open && setSelectedCustomer(null)}
+        />
+      )}
     </div>
   );
 }
