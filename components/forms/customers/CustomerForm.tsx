@@ -13,10 +13,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useCreateCustomerMutation } from "@/store/customers/customersApi";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 const customerSchema = z.object({
   name: z.string().min(3, "الاسم يجب أن يكون 3 أحرف على الأقل"),
@@ -34,7 +32,6 @@ interface CustomerFormProps {
 }
 
 export function CustomerForm({ onSuccess }: CustomerFormProps) {
-  const { toast } = useToast();
   const [createCustomer, { isLoading }] = useCreateCustomerMutation();
 
   const form = useForm<CustomerFormValues>({
@@ -52,18 +49,10 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
   async function onSubmit(data: CustomerFormValues) {
     try {
       await createCustomer(data).unwrap();
-      toast({
-        title: "تم النجاح",
-        description: "تم إضافة العميل بنجاح",
-      });
       form.reset();
       onSuccess?.();
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: error.data?.error || "حدث خطأ أثناء إضافة العميل",
-      });
+      console.error("Error creating customer:", error);
     }
   }
 
@@ -149,7 +138,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
             <FormItem>
               <FormLabel>ملاحظات</FormLabel>
               <FormControl>
-                <Textarea placeholder="أي ملاحظات إضافية..." {...field} />
+                <Input placeholder="أي ملاحظات إضافية..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
