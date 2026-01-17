@@ -11,10 +11,12 @@ export const transactionSchema = z.object({
 
   reason: z
     .enum([
-      "DEAL_PAYMENT",
+      "CUSTOMER_PAYMENT",
+      "CUSTOMER_REFUND",
       "EXPENSE",
       "WITHDRAW",
       "DEPOSIT",
+      "TREASURY_TRANSFER",
       "ADJUSTMENT",
       "OTHER",
     ])

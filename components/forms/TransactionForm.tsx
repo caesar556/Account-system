@@ -158,10 +158,12 @@ export default function AddTransactionForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="DEAL_PAYMENT">دفعة صفقة</SelectItem>
+                        <SelectItem value="CUSTOMER_PAYMENT">دفعة عميل</SelectItem>
+                        <SelectItem value="CUSTOMER_REFUND">مرتجع لعميل</SelectItem>
                         <SelectItem value="EXPENSE">مصروفات</SelectItem>
                         <SelectItem value="WITHDRAW">سحب</SelectItem>
                         <SelectItem value="DEPOSIT">إيداع</SelectItem>
+                        <SelectItem value="TREASURY_TRANSFER">تحويل بين الخزائن</SelectItem>
                         <SelectItem value="ADJUSTMENT">تسوية</SelectItem>
                         <SelectItem value="OTHER">أخرى</SelectItem>
                       </SelectContent>
