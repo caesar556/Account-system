@@ -12,9 +12,7 @@ export async function createCashTransaction(data: any) {
     const { customerId, ...transactionData } = data;
     const effectiveCustomerId = customerId === "none" ? null : customerId;
 
-    const treasury = await Treasury
-      .findById(data.treasuryId)
-      .session(session);
+    const treasury = await Treasury.findById(data.treasuryId).session(session);
 
     if (!treasury || !treasury.isActive) {
       throw new Error("الخزنة غير متاحة");
@@ -34,42 +32,41 @@ export async function createCashTransaction(data: any) {
 
     await treasury.save({ session });
 
-    // Update Customer Balance if customerId is provided
     if (effectiveCustomerId) {
-      const customer = await Customer.findById(effectiveCustomerId).session(session);
+      const customer =
+        await Customer.findById(effectiveCustomerId).session(session);
       if (customer) {
-        // Financial Logic:
-        // When we RECEIVE money (IN) from a customer, their debt (balance) decreases.
-        // When we PAY money (OUT) to a customer, their debt (balance) increases.
         const balanceChange = data.type === "IN" ? -data.amount : data.amount;
-        
-        // Enforce Credit Limit for debt increases
+
         if (balanceChange > 0 && customer.creditLimit > 0) {
           const projectedBalance = customer.balance + balanceChange;
           if (projectedBalance > customer.creditLimit) {
-            throw new Error(`العملية مرفوضة: العميل تجاوز الحد الائتماني المسموح به (${customer.creditLimit})`);
+            throw new Error(
+              `العملية مرفوضة: العميل تجاوز الحد الائتماني المسموح به (${customer.creditLimit})`,
+            );
           }
         }
 
         customer.balance += balanceChange;
-        
-        // Auto-update status based on balance
+
         if (customer.balance <= 0) {
           customer.status = "paid";
         } else {
           customer.status = "unpaid";
         }
-        
+
         await customer.save({ session });
       }
     }
 
     const [transaction] = await CashTransaction.create(
-      [{
-        ...transactionData,
-        customerId: effectiveCustomerId
-      }],
-      { session }
+      [
+        {
+          ...transactionData,
+          customerId: effectiveCustomerId,
+        },
+      ],
+      { session },
     );
 
     await session.commitTransaction();

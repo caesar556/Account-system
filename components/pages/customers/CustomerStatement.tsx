@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { useGetCustomerStatementQuery } from "@/store/customers/customersApi";
 import { Loader2, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { format } from "date-fns";
@@ -86,7 +87,9 @@ export function CustomerStatement({
                       <TableCell className="font-medium">{tx.description}</TableCell>
                       <TableCell>
                         <div className={`flex items-center gap-1 text-xs font-bold ${tx.type === "IN" ? "text-green-600" : "text-red-600"}`}>
-                          {tx.type === "IN" ? (
+                          {tx.eventType === "RECORD" ? (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">سجل</Badge>
+                          ) : tx.type === "IN" ? (
                             <><ArrowUpCircle className="h-3 w-3" /> وارد</>
                           ) : (
                             <><ArrowDownCircle className="h-3 w-3" /> صادر</>

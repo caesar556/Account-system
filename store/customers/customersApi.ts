@@ -36,10 +36,6 @@ export const customersApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Customers"],
     }),
-    getCustomerStatement: builder.query<any, string>({
-      query: (id) => `/customers/${id}/statement`,
-      providesTags: (result, error, id) => [{ type: "Customers", id }, "Transactions"],
-    }),
   }),
 });
 
@@ -49,5 +45,4 @@ export const {
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
-  useGetCustomerStatementQuery,
 } = customersApi;
