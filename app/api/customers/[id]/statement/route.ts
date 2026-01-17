@@ -5,10 +5,10 @@ import mongoose from "mongoose";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const customerId = params.id;
+    const { id: customerId } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
       return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 });
