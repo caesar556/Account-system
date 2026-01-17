@@ -187,7 +187,7 @@ export default function CustomersPage() {
                       <TableCell className="py-4 px-6">
                         <div className="flex flex-col gap-2">
                           <div className="flex gap-1">
-                            {customer.balance === 0 && (
+                            {customer.balance === 0 && customer.status === "paid" && (
                               <Badge
                                 variant="outline"
                                 className="bg-slate-50 text-slate-600 border-slate-200 font-bold px-2 py-0"
@@ -195,12 +195,12 @@ export default function CustomersPage() {
                                 خالص
                               </Badge>
                             )}
-                            {customer.balance > 0 && (
+                            {(customer.balance > 0 || customer.status === "unpaid") && (
                               <Badge
                                 variant="destructive"
                                 className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-bold px-2 py-0 shadow-none"
                               >
-                                مدين
+                                {customer.balance > 0 ? "مدين" : "عليه مديونية"}
                               </Badge>
                             )}
                             {customer.balance < 0 && (

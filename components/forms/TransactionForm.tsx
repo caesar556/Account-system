@@ -75,7 +75,6 @@ export default function AddTransactionForm() {
     setSuccess(false);
     setError(null);
     try {
-      // Ensure customerId is sent as null if "none" is selected
       const payload = {
         ...data,
         customerId: data.customerId === "none" ? null : data.customerId
