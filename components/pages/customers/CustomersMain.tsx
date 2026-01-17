@@ -115,7 +115,7 @@ export default function CustomersPage() {
               <TableBody>
                 {filteredCustomers.length > 0 ? (
                   filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id} className="hover:bg-muted/10 transition-colors">
+                    <TableRow key={customer._id || customer.id} className="hover:bg-muted/10 transition-colors">
                       <TableCell className="font-semibold">{customer.name}</TableCell>
                       <TableCell className="text-muted-foreground font-mono">{customer.phone || "—"}</TableCell>
                       <TableCell className="text-muted-foreground max-w-[200px] truncate">{customer.address || "—"}</TableCell>
