@@ -19,6 +19,16 @@ const CustomerSchema = new mongoose.Schema(
       trim: true,
     },
 
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    creditLimit: {
+      type: Number,
+      default: 0,
+    },
+
     balance: {
       type: Number,
       default: 0,

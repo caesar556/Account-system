@@ -13,38 +13,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search } from "lucide-react";
-
-const customers = [
-  {
-    id: "1",
-    name: "Ahmed Ali",
-    phone: "01012345678",
-    balance: 1500,
-    status: "DUE",
-  },
-  {
-    id: "2",
-    name: "Mohamed Hassan",
-    phone: "01198765432",
-    balance: 0,
-    status: "PAID",
-  },
-  {
-    id: "3",
-    name: "Sara Ibrahim",
-    phone: "01255544321",
-    balance: -300,
-    status: "CREDIT",
-  },
-];
+import { useGetCustomersQuery } from "@/store/customers/customersApi";
+import { Loader2, Plus, Search } from "lucide-react";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
+  const { data: customers = [], isLoading, error } = useGetCustomersQuery();
 
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()),
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-500">
+        Error loading customers. Please try again.
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -104,14 +98,14 @@ export default function CustomersPage() {
                     {customer.balance} EGP
                   </TableCell>
                   <TableCell>
-                    {customer.status === "PAID" && (
+                    {customer.balance === 0 && (
                       <Badge variant="secondary">Paid</Badge>
                     )}
-                    {customer.status === "DUE" && (
+                    {customer.balance > 0 && (
                       <Badge variant="destructive">Due</Badge>
                     )}
-                    {customer.status === "CREDIT" && (
-                      <Badge className="bg-green-600">Credit</Badge>
+                    {customer.balance < 0 && (
+                      <Badge className="bg-green-600 text-white">Credit</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
