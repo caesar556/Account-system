@@ -7,6 +7,7 @@ const CashTransactionSchema = new mongoose.Schema(
       ref: "Treasury",
       required: true,
     },
+
     type: {
       type: String,
       enum: ["IN", "OUT"],
@@ -22,13 +23,16 @@ const CashTransactionSchema = new mongoose.Schema(
     reason: {
       type: String,
       enum: [
-        "DEAL_PAYMENT",
+        "CUSTOMER_PAYMENT",
+        "CUSTOMER_REFUND",
         "EXPENSE",
         "WITHDRAW",
         "DEPOSIT",
+        "TREASURY_TRANSFER",
         "ADJUSTMENT",
         "OTHER",
       ],
+      required: true,
     },
 
     description: {
@@ -42,9 +46,15 @@ const CashTransactionSchema = new mongoose.Schema(
       default: "CASH",
     },
 
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      default: null,
+    },
+
     referenceType: {
       type: String,
-      enum: ["DEAL", "PAYMENT", "MANUAL"],
+      enum: ["CUSTOMER_RECORD", "INVOICE", "EXPENSE", "MANUAL"],
       default: "MANUAL",
     },
 

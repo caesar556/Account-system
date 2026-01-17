@@ -64,7 +64,7 @@ export default async function Home() {
           <Link href="/cash">
             <Button className="bg-violet-600 hover:bg-violet-700 gap-2 h-11 px-6 text-lg font-bold shadow-lg shadow-violet-200 transition-all active:scale-95">
               <PlusCircle className="h-5 w-5" />
-              أختر الخزينة
+              إضافة عملية جديدة
             </Button>
           </Link>
         </div>

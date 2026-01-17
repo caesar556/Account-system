@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import {
   Wallet,
   History,
   Filter,
   Search,
-  MoreVertical,
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
+  Trash,
 } from "lucide-react";
 
 import {
@@ -39,51 +38,22 @@ import AddTransactionForm from "@/components/forms/TransactionForm";
 import HeaderSection from "./HeaderSection";
 import Status from "./Status";
 import { formatDate } from "@/lib/utils";
-
-import {
-  useGetTransactionsQuery,
-  useDeleteTransactionMutation,
-} from "@/store/transactions/transactionsApi";
+import { useTransactions } from "@/hooks/data/useTransactions";
 
 export default function TreasuryMain() {
   const {
-    data,
+    transactions,
     isLoading,
     isError,
-  } = useGetTransactionsQuery();
+    searchTerm,
+    setSearchTerm,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    handleDelete,
+    totalItems
+  } = useTransactions();
 
-  const [deleteTransaction] = useDeleteTransactionMutation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
-
-  const rawTransactions = Array.isArray(data) ? (data as any[]) : (data as any)?.transactions || [];
-  
-  // Search filtering
-  const filteredTransactions = rawTransactions.filter((tx: any) => 
-    tx.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tx.amount?.toString().includes(searchTerm) ||
-    tx.type?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalItems = filteredTransactions.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
-  // Pagination
-  const transactions = filteredTransactions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handleDelete = async (id: string) => {
-    if (confirm("هل أنت متأكد من حذف هذه المعاملة؟")) {
-      try {
-        await deleteTransaction(id).unwrap();
-      } catch (err) {
-        console.error("Failed to delete transaction", err);
-      }
-    }
-  };
 
   if (isLoading) {
     return (
@@ -107,12 +77,10 @@ export default function TreasuryMain() {
       <Status />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Form */}
         <div className="lg:col-span-4">
           <AddTransactionForm />
         </div>
 
-        {/* Table */}
         <div className="lg:col-span-8">
           <Card className="shadow-md">
             <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 pb-6">
@@ -163,9 +131,7 @@ export default function TreasuryMain() {
                       <TableHead className="text-right hidden md:table-cell">
                         الوسيلة
                       </TableHead>
-                      <TableHead className="text-left">
-                        التوقيت
-                      </TableHead>
+                      <TableHead className="text-left">التوقيت</TableHead>
                       <TableHead className="w-[50px]" />
                     </TableRow>
                   </TableHeader>
@@ -177,7 +143,9 @@ export default function TreasuryMain() {
                           colSpan={6}
                           className="text-center text-muted-foreground h-24"
                         >
-                          {searchTerm ? "لا توجد نتائج تطابق بحثك" : "لا توجد عمليات مسجلة"}
+                          {searchTerm
+                            ? "لا توجد نتائج تطابق بحثك"
+                            : "لا توجد عمليات مسجلة"}
                         </TableCell>
                       </TableRow>
                     )}
@@ -205,9 +173,7 @@ export default function TreasuryMain() {
                         {/* Amount */}
                         <TableCell
                           className={`font-bold ${
-                            tx.type === "IN"
-                              ? "text-green-600"
-                              : "text-red-600"
+                            tx.type === "IN" ? "text-green-600" : "text-red-600"
                           }`}
                         >
                           {tx.amount.toLocaleString("ar-EG")}
@@ -222,7 +188,11 @@ export default function TreasuryMain() {
                         <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <Wallet className="h-3.5 w-3.5" />
-                            {tx.method === "CASH" ? "نقدي" : tx.method === "TRANSFER" ? "تحويل" : "شيك"}
+                            {tx.method === "CASH"
+                              ? "نقدي"
+                              : tx.method === "TRANSFER"
+                                ? "تحويل"
+                                : "شيك"}
                           </div>
                         </TableCell>
 
@@ -239,7 +209,7 @@ export default function TreasuryMain() {
                             className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                             onClick={() => handleDelete(tx._id)}
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <Trash className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -260,7 +230,7 @@ export default function TreasuryMain() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="h-8 text-xs gap-1"
                 >
@@ -270,7 +240,9 @@ export default function TreasuryMain() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages || totalPages === 0}
                   className="h-8 text-xs gap-1"
                 >
