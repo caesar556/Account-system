@@ -105,7 +105,9 @@ export default function CustomersPage() {
                 <TableRow className="bg-muted/20 hover:bg-muted/20">
                   <TableHead className="text-right font-bold">الاسم</TableHead>
                   <TableHead className="text-right font-bold">رقم الهاتف</TableHead>
+                  <TableHead className="text-right font-bold">العنوان</TableHead>
                   <TableHead className="text-right font-bold">الرصيد</TableHead>
+                  <TableHead className="text-right font-bold">الحد الائتماني</TableHead>
                   <TableHead className="text-right font-bold">الحالة</TableHead>
                   <TableHead className="text-left font-bold">الإجراءات</TableHead>
                 </TableRow>
@@ -116,6 +118,7 @@ export default function CustomersPage() {
                     <TableRow key={customer.id} className="hover:bg-muted/10 transition-colors">
                       <TableCell className="font-semibold">{customer.name}</TableCell>
                       <TableCell className="text-muted-foreground font-mono">{customer.phone || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-[200px] truncate">{customer.address || "—"}</TableCell>
                       <TableCell
                         className={`font-bold ${
                           customer.balance > 0
@@ -126,6 +129,9 @@ export default function CustomersPage() {
                         }`}
                       >
                         {Math.abs(customer.balance).toLocaleString()} ج.م
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {customer.creditLimit ? `${customer.creditLimit.toLocaleString()} ج.م` : "—"}
                       </TableCell>
                       <TableCell>
                         {customer.balance === 0 && (
