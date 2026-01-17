@@ -75,7 +75,12 @@ export default function AddTransactionForm() {
     setSuccess(false);
     setError(null);
     try {
-      await createTransaction(data).unwrap();
+      // Ensure customerId is sent as null if "none" is selected
+      const payload = {
+        ...data,
+        customerId: data.customerId === "none" ? null : data.customerId
+      };
+      await createTransaction(payload).unwrap();
       setSuccess(true);
       form.reset();
     } catch (err: any) {
