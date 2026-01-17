@@ -5,22 +5,23 @@ import mongoose from "mongoose";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: customerId } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
-      return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid customer ID" },
+        { status: 400 },
+      );
     }
 
-    // Fetch transactions and records sorted by date
     const [transactions, records] = await Promise.all([
       CashTransaction.find({ customerId }).sort({ createdAt: 1 }).lean(),
-      CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean()
+      CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean(),
     ]);
 
-    // Combine and sort all events by date
     const allEvents = [
       ...transactions.map((tx: any) => ({
         ...tx,
@@ -31,30 +32,31 @@ export async function GET(
         ...rec,
         eventDate: rec.createdAt,
         eventType: "RECORD",
-        // A record (like an invoice) increases debt
         amount: rec.totalAmount,
-        type: "OUT", // Standard accounting: Debt increase
-        description: `سجل: ${rec.title} - ${rec.description || ""}`
-      }))
-    ].sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+        type: "OUT",
+        description: `سجل: ${rec.title} - ${rec.description || ""}`,
+      })),
+    ].sort(
+      (a, b) =>
+        new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
+    );
 
     let runningBalance = 0;
     const statement = allEvents.map((event: any) => {
-      // Logic: IN (Payment from customer) reduces debt, OUT (Credit/Invoice to customer) increases debt
       const change = event.type === "IN" ? -event.amount : event.amount;
       runningBalance += change;
-      
+
       return {
         ...event,
         balanceAfter: runningBalance,
-        change
+        change,
       };
     });
 
     return NextResponse.json({
       customerId,
       currentBalance: runningBalance,
-      transactions: statement.reverse() // Show latest first for display
+      transactions: statement.reverse(),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
