@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Customer from "@/models/Customer";
+import { CashTransaction } from "@/models/CashTransaction";
+import CustomerRecord from "@/models/CustomerRecord";
 
 export async function GET(
   request: Request,
@@ -8,11 +10,28 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const customer = await Customer.findById(params.id);
+    const customer = await Customer.findById(params.id).lean();
     if (!customer) {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
-    return NextResponse.json(customer);
+
+    const [transactions, records] = await Promise.all([
+      CashTransaction.find({ customerId: params.id }).lean(),
+      CustomerRecord.find({ customerId: params.id }).lean(),
+    ]);
+
+    const transactionBalance = transactions.reduce((acc: number, tx: any) => {
+      return acc + (tx.type === "OUT" ? tx.amount : -tx.amount);
+    }, 0);
+
+    const recordBalance = records.reduce((acc: number, rec: any) => {
+      return acc + rec.totalAmount;
+    }, 0);
+
+    return NextResponse.json({
+      ...customer,
+      balance: transactionBalance + recordBalance,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

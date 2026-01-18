@@ -1,12 +1,37 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Customer from "@/models/Customer";
+import { CashTransaction } from "@/models/CashTransaction";
+import CustomerRecord from "@/models/CustomerRecord";
 
 export async function GET() {
   try {
     await dbConnect();
-    const customers = await Customer.find().sort({ createdAt: -1 });
-    return NextResponse.json(customers);
+    const customers = await Customer.find().sort({ createdAt: -1 }).lean();
+    
+    // Calculate balance for each customer
+    const customersWithBalance = await Promise.all(customers.map(async (customer: any) => {
+      const customerId = customer._id;
+      const [transactions, records] = await Promise.all([
+        CashTransaction.find({ customerId }).lean(),
+        CustomerRecord.find({ customerId }).lean(),
+      ]);
+
+      const transactionBalance = transactions.reduce((acc: number, tx: any) => {
+        return acc + (tx.type === "OUT" ? tx.amount : -tx.amount);
+      }, 0);
+
+      const recordBalance = records.reduce((acc: number, rec: any) => {
+        return acc + rec.totalAmount;
+      }, 0);
+
+      return {
+        ...customer,
+        balance: transactionBalance + recordBalance,
+      };
+    }));
+
+    return NextResponse.json(customersWithBalance);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
