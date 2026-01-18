@@ -18,7 +18,7 @@ export async function createCashTransaction(data: any) {
     }
   }
 
-  if (customer && type === "OUT" && customer.creditLimit > 0) {
+  if (customer && type === "OUT" && (customer as any).creditLimit > 0) {
     const agg = await CashTransaction.aggregate([
       { $match: { customerId: customer._id } },
       {
@@ -40,8 +40,8 @@ export async function createCashTransaction(data: any) {
     const currentBalance = agg[0]?.balance || 0;
     const projectedBalance = currentBalance + amount;
 
-    if (projectedBalance > customer.creditLimit) {
-      throw new Error(`العميل تجاوز الحد الائتماني (${customer.creditLimit})`);
+    if (projectedBalance > (customer as any).creditLimit) {
+      throw new Error(`العميل تجاوز الحد الائتماني (${(customer as any).creditLimit})`);
     }
   }
 
