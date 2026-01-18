@@ -25,17 +25,17 @@ export async function GET(
   ]);
 
   const events = [
-    ...transactions.map((tx: any) => ({
+    ...(transactions || []).map((tx: any) => ({
       ...tx,
       eventDate: tx.createdAt,
       eventType: "TRANSACTION",
-      change: tx.type === "OUT" ? tx.amount : -tx.amount,
+      change: tx.type === "OUT" ? (Number(tx.amount) || 0) : -(Number(tx.amount) || 0),
     })),
-    ...records.map((rec: any) => ({
+    ...(records || []).map((rec: any) => ({
       ...rec,
       eventDate: rec.createdAt,
       eventType: "RECORD",
-      change: rec.totalAmount,
+      change: Number(rec.totalAmount) || 0,
     })),
   ].sort(
     (a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),

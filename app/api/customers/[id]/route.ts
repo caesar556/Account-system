@@ -20,12 +20,14 @@ export async function GET(
       CustomerRecord.find({ customerId: params.id }).lean(),
     ]);
 
-    const transactionBalance = transactions.reduce((acc: number, tx: any) => {
-      return acc + (tx.type === "OUT" ? tx.amount : -tx.amount);
+    const transactionBalance = (transactions || []).reduce((acc: number, tx: any) => {
+      const amount = Number(tx.amount) || 0;
+      return acc + (tx.type === "OUT" ? amount : -amount);
     }, 0);
 
-    const recordBalance = records.reduce((acc: number, rec: any) => {
-      return acc + rec.totalAmount;
+    const recordBalance = (records || []).reduce((acc: number, rec: any) => {
+      const amount = Number(rec.totalAmount) || 0;
+      return acc + amount;
     }, 0);
 
     return NextResponse.json({
