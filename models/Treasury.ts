@@ -2,12 +2,7 @@ import mongoose from "mongoose";
 
 const TreasurySchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
+    name: { type: String, required: true, unique: true },
 
     type: {
       type: String,
@@ -21,31 +16,11 @@ const TreasurySchema = new mongoose.Schema(
       default: "EGP",
     },
 
-    balance: {
-      type: Number,
-      default: 0,
-    },
+    minBalance: { type: Number, default: 0 },
+    isDefault: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
 
-    minBalance: {
-      type: Number,
-      default: 0,
-    },
-
-    isDefault: {
-      type: Boolean,
-      default: false,
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    closedAt: {
-      type: Date,
-      default: null,
-    },
-
+    closedAt: Date,
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

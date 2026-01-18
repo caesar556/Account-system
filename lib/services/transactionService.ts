@@ -1,80 +1,54 @@
-import mongoose from "mongoose";
 import { Treasury } from "@/models/Treasury";
 import { CashTransaction } from "@/models/CashTransaction";
 import Customer from "@/models/Customer";
 
 export async function createCashTransaction(data: any) {
-  const session = await mongoose.startSession();
+  const { treasuryId, customerId, type, amount } = data;
 
-  try {
-    session.startTransaction();
-
-    const { customerId, ...transactionData } = data;
-    const effectiveCustomerId = customerId === "none" ? null : customerId;
-
-    const treasury = await Treasury.findById(data.treasuryId).session(session);
-
-    if (!treasury || !treasury.isActive) {
-      throw new Error("الخزنة غير متاحة");
-    }
-
-    if (data.type === "OUT") {
-      const newBalance = treasury.balance - data.amount;
-
-      if (newBalance < treasury.minBalance) {
-        throw new Error("الرصيد أقل من الحد الأدنى");
-      }
-
-      treasury.balance = newBalance;
-    } else {
-      treasury.balance += data.amount;
-    }
-
-    await treasury.save({ session });
-
-    if (effectiveCustomerId) {
-      const customer =
-        await Customer.findById(effectiveCustomerId).session(session);
-      if (customer) {
-        const balanceChange = data.type === "IN" ? -data.amount : data.amount;
-
-        if (balanceChange > 0 && customer.creditLimit > 0) {
-          const projectedBalance = customer.balance + balanceChange;
-          if (projectedBalance > customer.creditLimit) {
-            throw new Error(
-              `العملية مرفوضة: العميل تجاوز الحد الائتماني المسموح به (${customer.creditLimit})`,
-            );
-          }
-        }
-
-        customer.balance += balanceChange;
-
-        if (customer.balance <= 0) {
-          customer.status = "paid";
-        } else {
-          customer.status = "unpaid";
-        }
-
-        await customer.save({ session });
-      }
-    }
-
-    const [transaction] = await CashTransaction.create(
-      [
-        {
-          ...transactionData,
-          customerId: effectiveCustomerId,
-        },
-      ],
-      { session },
-    );
-
-    await session.commitTransaction();
-    return transaction;
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
+  const treasury = await Treasury.findById(treasuryId);
+  if (!treasury || !treasury.isActive) {
+    throw new Error("الخزنة غير متاحة");
   }
+
+  let customer = null;
+  if (customerId && customerId !== "none") {
+    customer = await Customer.findById(customerId);
+    if (!customer || !customer.isActive) {
+      throw new Error("العميل غير متاح");
+    }
+  }
+
+  if (customer && type === "OUT" && customer.creditLimit > 0) {
+    const agg = await CashTransaction.aggregate([
+      { $match: { customerId: customer._id } },
+      {
+        $group: {
+          _id: null,
+          balance: {
+            $sum: {
+              $cond: [
+                { $eq: ["$type", "OUT"] },
+                "$amount",
+                { $multiply: ["$amount", -1] },
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    const currentBalance = agg[0]?.balance || 0;
+    const projectedBalance = currentBalance + amount;
+
+    if (projectedBalance > customer.creditLimit) {
+      throw new Error(`العميل تجاوز الحد الائتماني (${customer.creditLimit})`);
+    }
+  }
+
+  const transaction = await CashTransaction.create({
+    ...data,
+    customerId: customer ? customer._id : null,
+  });
+
+  return transaction;
 }

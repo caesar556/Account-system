@@ -51,9 +51,8 @@ export default function TreasuryMain() {
     setCurrentPage,
     totalPages,
     handleDelete,
-    totalItems
+    totalItems,
   } = useTransactions();
-
 
   if (isLoading) {
     return (
@@ -131,6 +130,7 @@ export default function TreasuryMain() {
                       <TableHead className="text-right hidden md:table-cell">
                         الوسيلة
                       </TableHead>
+                      <TableHead className="text-right">السبب</TableHead>
                       <TableHead className="text-left">التوقيت</TableHead>
                       <TableHead className="w-[50px]" />
                     </TableRow>
@@ -195,6 +195,8 @@ export default function TreasuryMain() {
                                 : "شيك"}
                           </div>
                         </TableCell>
+
+                        <TableCell> {tx.reason} </TableCell>
 
                         {/* Date */}
                         <TableCell className="text-left text-xs text-muted-foreground font-mono">

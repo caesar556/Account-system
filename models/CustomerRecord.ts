@@ -8,39 +8,24 @@ const CustomerRecordSchema = new mongoose.Schema(
       required: true,
     },
 
-    title: {
-      type: String,
-      required: true,
-    },
-
-    description: {
-      type: String,
-    },
+    title: { type: String, required: true },
+    description: String,
 
     totalAmount: {
       type: Number,
       required: true,
+      min: 0,
     },
 
-    paidAmount: {
-      type: Number,
-      default: 0,
-    },
+    dueDate: Date,
 
     status: {
       type: String,
-      enum: ["OPEN", "PARTIAL", "PAID"],
+      enum: ["OPEN", "PAID"],
       default: "OPEN",
     },
-
-    transactions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Transaction",
-      },
-    ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.models.CustomerRecord ||
