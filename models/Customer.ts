@@ -13,7 +13,6 @@ const CustomerSchema = new mongoose.Schema(
       default: "regular",
     },
 
-    balance: { type: Number, default: 0 },
     creditLimit: { type: Number, default: 0 },
 
     isActive: { type: Boolean, default: true },
