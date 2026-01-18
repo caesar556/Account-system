@@ -55,14 +55,14 @@ export function CustomerStatement({
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-muted/50 text-center">
                 <p className="text-sm text-muted-foreground">الرصيد الحالي</p>
-                <p className={`text-2xl font-black ${(data?.currentBalance || 0) > 0 ? "text-red-600" : "text-green-600"}`}>
+                <p className={`text-2xl font-black ${(data?.currentBalance || 0) > 0 ? "text-red-600" : (data?.currentBalance || 0) < 0 ? "text-green-600" : "text-slate-500"}`}>
                   {Math.abs(data?.currentBalance || 0).toLocaleString()} ج.م
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-muted/50 text-center">
                 <p className="text-sm text-muted-foreground">عدد العمليات</p>
                 <p className="text-2xl font-black text-primary">
-                  {data?.transactions?.length || 0}
+                  {data?.statement?.length || 0}
                 </p>
               </div>
             </div>
@@ -79,17 +79,17 @@ export function CustomerStatement({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.transactions?.map((tx: any) => (
-                    <TableRow key={tx._id}>
+                  {data?.statement?.map((tx: any, idx: number) => (
+                    <TableRow key={tx._id || idx}>
                       <TableCell className="text-xs">
-                        {format(new Date(tx.createdAt), "yyyy/MM/dd HH:mm", { locale: ar })}
+                        {tx.eventDate ? format(new Date(tx.eventDate), "yyyy/MM/dd HH:mm", { locale: ar }) : "—"}
                       </TableCell>
-                      <TableCell className="font-medium">{tx.description}</TableCell>
+                      <TableCell className="font-medium">{tx.description || tx.title || "—"}</TableCell>
                       <TableCell>
-                        <div className={`flex items-center gap-1 text-xs font-bold ${tx.type === "IN" ? "text-green-600" : "text-red-600"}`}>
+                        <div className={`flex items-center gap-1 text-xs font-bold ${tx.change > 0 ? "text-red-600" : tx.change < 0 ? "text-green-600" : "text-slate-500"}`}>
                           {tx.eventType === "RECORD" ? (
                             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">سجل</Badge>
-                          ) : tx.type === "IN" ? (
+                          ) : tx.change < 0 ? (
                             <><ArrowUpCircle className="h-3 w-3" /> وارد</>
                           ) : (
                             <><ArrowDownCircle className="h-3 w-3" /> صادر</>
@@ -97,14 +97,14 @@ export function CustomerStatement({
                         </div>
                       </TableCell>
                       <TableCell className="font-bold">
-                        {tx.amount.toLocaleString()}
+                        {Math.abs(tx.change || 0).toLocaleString()}
                       </TableCell>
-                      <TableCell className={`font-black ${tx.balanceAfter > 0 ? "text-red-600" : "text-green-600"}`}>
-                        {Math.abs(tx.balanceAfter).toLocaleString()}
+                      <TableCell className={`font-black ${tx.balanceAfter > 0 ? "text-red-600" : tx.balanceAfter < 0 ? "text-green-600" : "text-slate-500"}`}>
+                        {Math.abs(tx.balanceAfter || 0).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(!data?.transactions || data.transactions.length === 0) && (
+                  {(!data?.statement || data.statement.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                         لا توجد معاملات مسجلة لهذا العميل
