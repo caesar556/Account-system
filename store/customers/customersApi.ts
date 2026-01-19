@@ -1,122 +1,96 @@
-import { apiSlice } from "../apiSlice";
+import { apiSlice } from "@/store/apiSlice";
 
 export const customersApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // =========================
-    // Customers (CRUD)
+    // Get All Customers
     // =========================
     getCustomers: builder.query<any[], void>({
       query: () => "/customers",
-      providesTags: ["Customers"],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((c) => ({
+                type: "Customers" as const,
+                id: c._id,
+              })),
+              { type: "Customers", id: "LIST" },
+            ]
+          : [{ type: "Customers", id: "LIST" }],
     }),
 
-    getCustomer: builder.query<any, string>({
-      query: (id) => `/customers/${id}`,
+    // =========================
+    // Get One Customer
+    // =========================
+    getCustomerById: builder.query<any, string>({
+      query: (customerId) => `/customers/${customerId}`,
       providesTags: (result, error, id) => [{ type: "Customers", id }],
     }),
 
-    createCustomer: builder.mutation<any, any>({
+    // =========================
+    // Create Customer
+    // =========================
+    createCustomer: builder.mutation<any, Partial<any>>({
       query: (body) => ({
         url: "/customers",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Customers"],
+      invalidatesTags: [{ type: "Customers", id: "LIST" }],
     }),
 
-    updateCustomer: builder.mutation<any, { id: string; body: any }>({
+    // =========================
+    // Update Customer
+    // =========================
+    updateCustomer: builder.mutation<any, { id: string; body: Partial<any> }>({
       query: ({ id, body }) => ({
         url: `/customers/${id}`,
-        method: "PUT",
+        method: "PATCH",
         body,
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "Customers", id },
-        "Customers",
-        "Statements",
+        { type: "Customers", id: "LIST" },
       ],
     }),
 
+    // =========================
+    // Delete Customer
+    // =========================
     deleteCustomer: builder.mutation<any, string>({
       query: (id) => ({
         url: `/customers/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Customers", "Statements", "Transactions", "CustomerRecords"],
-    }),
-
-
-    getCustomerStatement: builder.query<any, string>({
-      query: (id) => `/customers/${id}/statement`,
-      providesTags: (result, error, id) => [
-        { type: "Statements", id },
-        "Customers",
-        "Transactions",
-        "CustomerRecords",
+      invalidatesTags: (result, error, id) => [
+        { type: "Customers", id },
+        { type: "Customers", id: "LIST" },
       ],
     }),
 
-
-
-    getCustomerTransactions: builder.query<any[], string>({
-      query: (id) => `/customers/${id}/transactions`,
-      providesTags: (result, error, id) => [
-        { type: "Transactions", id },
+    // =========================
+    // Customer Statement
+    // =========================
+    getCustomerStatement: builder.query<
+      {
+        currentBalance: number;
+        statement: any[];
+      },
+      string
+    >({
+      query: (customerId) => `/customers/${customerId}`,
+      providesTags: (result, error, customerId) => [
+        { type: "Statements", id: customerId },
       ],
-    }),
-
-
-
-    
-    getCustomerRecords: builder.query<any[], string>({
-      query: (customerId) => `/customer-records?customerId=${customerId}`,
-      providesTags: (result, error, id) => [
-        { type: "CustomerRecords", id },
-      ],
-    }),
-
-    createCustomerRecord: builder.mutation<any, any>({
-      query: (body) => ({
-        url: "/customer-records",
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["CustomerRecords", "Statements", "Transactions", "Customers"],
-    }),
-
-    updateCustomerRecord: builder.mutation<any, { id: string; body: any }>({
-      query: ({ id, body }) => ({
-        url: `/customer-records/${id}`,
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "CustomerRecords", id },
-        "CustomerRecords",
-        "Statements",
-      ],
-    }),
-
-    deleteCustomerRecord: builder.mutation<any, string>({
-      query: (id) => ({
-        url: `/customer-records/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["CustomerRecords", "Statements", "Transactions"],
     }),
   }),
 });
 
 export const {
   useGetCustomersQuery,
-  useGetCustomerQuery,
+  useGetCustomerByIdQuery,
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
   useGetCustomerStatementQuery,
-  useGetCustomerTransactionsQuery,
-  useGetCustomerRecordsQuery,
-  useCreateCustomerRecordMutation,
-  useUpdateCustomerRecordMutation,
-  useDeleteCustomerRecordMutation,
 } = customersApi;
