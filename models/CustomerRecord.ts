@@ -17,6 +17,12 @@ const CustomerRecordSchema = new mongoose.Schema(
       min: 0,
     },
 
+    paidAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     dueDate: Date,
 
     status: {
@@ -25,7 +31,7 @@ const CustomerRecordSchema = new mongoose.Schema(
       default: "OPEN",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.CustomerRecord ||

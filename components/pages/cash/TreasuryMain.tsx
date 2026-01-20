@@ -34,11 +34,11 @@ import {
 
 import { Separator } from "@/components/ui/separator";
 
-import AddTransactionForm from "@/components/forms/TransactionForm";
 import HeaderSection from "./HeaderSection";
 import Status from "./Status";
 import { formatDate } from "@/lib/utils";
 import { useTransactions } from "@/hooks/data/useTransactions";
+import TransactionMain from "@/components/forms/transactions/TransactionMain";
 
 export default function TreasuryMain() {
   const {
@@ -77,7 +77,7 @@ export default function TreasuryMain() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <AddTransactionForm />
+          <TransactionMain />
         </div>
 
         <div className="lg:col-span-8">

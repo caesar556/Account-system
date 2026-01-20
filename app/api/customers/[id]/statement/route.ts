@@ -1,56 +1,24 @@
 import { NextResponse } from "next/server";
-import { CashTransaction } from "@/models/CashTransaction";
-import CustomerRecord from "@/models/CustomerRecord";
-import Customer from "@/models/Customer";
-import mongoose from "mongoose";
+import { StatementService } from "@/lib/services/statementService";
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } },
 ) {
-  const customerId = params.id;
+  try {
+    const { id } = await params;
 
-  if (!mongoose.Types.ObjectId.isValid(customerId)) {
-    return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Customer ID is required" },
+        { status: 400 },
+      );
+    }
+
+    const statement = await StatementService.generateStatement(id);
+
+    return NextResponse.json(statement);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  const customer = await Customer.findById(customerId).lean();
-  if (!customer) {
-    return NextResponse.json({ error: "Customer not found" }, { status: 404 });
-  }
-
-  const [transactions, records] = await Promise.all([
-    CashTransaction.find({ customerId }).sort({ createdAt: 1 }).lean(),
-    CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean(),
-  ]);
-
-  const events = [
-    ...(transactions || []).map((tx: any) => ({
-      ...tx,
-      eventDate: tx.createdAt,
-      eventType: "TRANSACTION",
-      change: tx.type === "OUT" ? (Number(tx.amount) || 0) : -(Number(tx.amount) || 0),
-    })),
-    ...(records || []).map((rec: any) => ({
-      ...rec,
-      eventDate: rec.createdAt,
-      eventType: "RECORD",
-      change: Number(rec.totalAmount) || 0,
-    })),
-  ].sort(
-    (a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime(),
-  );
-
-  let balance = 0;
-  const statement = events.map((e: any) => {
-    balance += e.change;
-    return { ...e, balanceAfter: balance };
-  });
-
-  return NextResponse.json({
-    customerId,
-    customer,
-    currentBalance: balance,
-    statement,
-  });
 }
