@@ -83,8 +83,12 @@ export function useTransactionForm({
     skip: !customerId || customerId === "NO_CUSTOMER",
   });
 
-  const customers: ICustomer[] = customersData?.data || [];
+  const customers: ICustomer[] = customersData || [];
   const treasuries: ITreasury[] = treasuriesData || [];
+
+  console.log("customerData", customerSummary);
+
+  console.log("customerData", customersData);
 
   const selectedCustomer = useMemo(() => {
     if (!customerId || customerId === "NO_CUSTOMER") return null;
@@ -130,7 +134,9 @@ export function useTransactionForm({
       const payload = {
         ...data,
         customerId:
-          !data.customerId || data.customerId === "NO_CUSTOMER" ? undefined : data.customerId,
+          !data.customerId || data.customerId === "NO_CUSTOMER"
+            ? undefined
+            : data.customerId,
         referenceId: data.referenceId ?? undefined,
       };
 

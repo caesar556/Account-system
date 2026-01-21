@@ -75,12 +75,12 @@ export default function TreasuryMain() {
       <HeaderSection />
       <Status />
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-4">
+      <div className="grid gap-6 lg:grid-cols-12 ">
+        <div className="lg:col-span-12">
           <TransactionMain />
         </div>
 
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-12">
           <Card className="shadow-md">
             <CardHeader className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 pb-6">
               <div className="space-y-1">
