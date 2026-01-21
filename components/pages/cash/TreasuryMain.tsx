@@ -160,13 +160,13 @@ export default function TreasuryMain() {
                           <Badge
                             variant="outline"
                             className={
-                              tx.type === "CREDIT"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : "bg-red-50 text-red-700 border-red-200"
+                              tx.type === "DEBIT"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
                             }
                           >
                             <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
-                            {tx.type === "CREDIT" ? "إيداع" : "سحب"}
+                            {tx.type === "DEBIT" ? "مقبوضات" : "مدفوعات"}
                           </Badge>
                         </TableCell>
 
@@ -174,10 +174,11 @@ export default function TreasuryMain() {
                         <TableCell
                           className={`font-bold ${
                             tx.type === "DEBIT"
-                              ? "text-green-600"
-                              : "text-red-600"
+                              ? "text-emerald-600"
+                              : "text-rose-600"
                           }`}
                         >
+                          {tx.type === "DEBIT" ? "+" : "-"}
                           {tx.amount.toLocaleString("ar-EG")} ج.م
                         </TableCell>
 
