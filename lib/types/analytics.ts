@@ -4,6 +4,7 @@ export interface AnalyticsResponse {
     totalOut: number;
     net: number;
     transactions: number;
+    treasuryBalance: number;
   };
   charts: {
     byType: { _id: "DEBIT" | "CREDIT"; total: number; count: number }[];

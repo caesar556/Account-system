@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { CashTransaction } from "@/models/CashTransaction";
+import { Treasury } from "@/models/Treasury";
 import mongoose from "mongoose";
 
 export async function GET(req: Request) {
@@ -23,6 +24,16 @@ export async function GET(req: Request) {
 
     if (treasuryId) {
       match.treasuryId = new mongoose.Types.ObjectId(treasuryId);
+    }
+
+    // Fetch Treasury Balance
+    let treasuryBalance = 0;
+    if (treasuryId) {
+      const t = await Treasury.findById(treasuryId);
+      treasuryBalance = t?.currentBalance || 0;
+    } else {
+      const treasuries = await Treasury.find();
+      treasuryBalance = treasuries.reduce((acc, curr) => acc + curr.currentBalance, 0);
     }
 
     const [result] = await CashTransaction.aggregate([
@@ -135,11 +146,14 @@ export async function GET(req: Request) {
     ]);
 
     return NextResponse.json({
-      kpis: result.kpis[0] ?? {
-        totalIn: 0,
-        totalOut: 0,
-        net: 0,
-        transactions: 0,
+      kpis: {
+        ...(result.kpis[0] ?? {
+          totalIn: 0,
+          totalOut: 0,
+          net: 0,
+          transactions: 0,
+        }),
+        treasuryBalance,
       },
       charts: {
         byType: result.byType,
