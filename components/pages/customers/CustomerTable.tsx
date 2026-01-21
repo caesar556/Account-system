@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,15 +39,37 @@ import {
 import Link from "next/link";
 import { useCustomers } from "@/hooks/data/useCustomers";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CustomerTable() {
   const {
     customers: filteredCustomers,
+    isLoading,
     search,
     setSearch,
     categoryFilter,
     balanceFilter,
   } = useCustomers();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-8 w-[200px]" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 p-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const customerList = Array.isArray(filteredCustomers) ? filteredCustomers : [];
+
   return (
     <Card>
       <CardHeader>
@@ -55,14 +77,14 @@ export default function CustomerTable() {
           <div>
             <CardTitle>قائمة العملاء</CardTitle>
             <CardDescription className="mt-1">
-              {filteredCustomers.length} عميل
+              {customerList.length} عميل
               {search && ` مطابق لـ "${search}"`}
               {categoryFilter !== "all" && ` - فئة: ${categoryFilter}`}
               {balanceFilter !== "all" && ` - حالة مالية: ${balanceFilter}`}
             </CardDescription>
           </div>
           <Badge variant="secondary" className="text-base px-3 py-1">
-            {filteredCustomers.length} عميل
+            {customerList.length} عميل
           </Badge>
         </div>
       </CardHeader>
@@ -82,15 +104,17 @@ export default function CustomerTable() {
             </TableHeader>
 
             <TableBody>
-              {filteredCustomers.length > 0 ? (
-                filteredCustomers.map((customer: any) => {
+              {customerList.length > 0 ? (
+                customerList.map((customer: any) => {
                   const balance = customer.currentBalance || 0;
                   const initials = customer.name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2);
+                    ? customer.name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : "??";
 
                   return (
                     <TableRow key={customer._id} className="hover:bg-muted/30">
@@ -239,23 +263,23 @@ export default function CustomerTable() {
                                 خيارات العميل
                               </DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
+                              <DropdownMenuItem asChild>
                                 <Link
                                   href={`/customers/${customer._id}/transactions`}
-                                  className="w-full"
+                                  className="w-full text-right"
                                 >
                                   المعاملات
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem asChild>
                                 <Link
                                   href={`/customers/${customer._id}/edit`}
-                                  className="w-full"
+                                  className="w-full text-right"
                                 >
                                   تعديل البيانات
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem className="text-red-600 text-right">
                                 تعطيل الحساب
                               </DropdownMenuItem>
                             </DropdownMenuContent>
