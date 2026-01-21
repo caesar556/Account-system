@@ -73,13 +73,8 @@ export class TransactionService {
       const [transaction] = await CashTransaction.create([data], { session });
 
       // 6. Update Treasury Balance
-      // DEBIT = Customer takes goods (Debt increases) = Money doesn't necessarily enter treasury unless it's a cash sale
-      // CREDIT = Customer pays (Debt decreases) = Money INTO treasury = INCREASE
-      // HOWEVER, in this system's context:
-      // "DEBIT" usually means money OUT of treasury (Expense or providing cash to customer)
-      // "CREDIT" usually means money IN to treasury (Income or customer payment)
-      
-      // Let's align with the UI: DEBIT (Red) = OUT, CREDIT (Green) = IN
+      // DEBIT (Red) = OUT (Expense/Debt for customer) = DECREASE Treasury
+      // CREDIT (Green) = IN (Income/Payment from customer) = INCREASE Treasury
       const treasuryChange = data.type === "CREDIT" ? data.amount : -data.amount;
 
       await Treasury.findByIdAndUpdate(
@@ -87,6 +82,17 @@ export class TransactionService {
         { $inc: { currentBalance: treasuryChange } },
         { session },
       );
+
+      // 7. Update Customer Balance
+      // DEBIT = Debt increases = +Amount
+      // CREDIT = Debt decreases = -Amount
+      if (data.customerId) {
+        await Customer.findByIdAndUpdate(
+          data.customerId,
+          { $inc: { currentBalance: data.type === "DEBIT" ? data.amount : -data.amount } },
+          { session }
+        );
+      }
 
       await session.commitTransaction();
       return transaction;

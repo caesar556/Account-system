@@ -164,7 +164,7 @@ export function TransactionFormFields({
                   <SelectItem value="NO_CUSTOMER">بدون عميل</SelectItem>
                   {customers.map((customer) => (
                     <SelectItem key={customer._id} value={customer._id}>
-                      <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center justify-between w-full gap-4">
                         <span>{customer.name}</span>
                         <span className="text-xs font-medium">
                           {customer.currentBalance > 0

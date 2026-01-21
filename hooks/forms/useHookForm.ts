@@ -130,7 +130,7 @@ export function useTransactionForm({
       const payload = {
         ...data,
         customerId:
-          data.customerId === "NO_CUSTOMER" ? undefined : data.customerId,
+          !data.customerId || data.customerId === "NO_CUSTOMER" ? undefined : data.customerId,
         referenceId: data.referenceId ?? undefined,
       };
 
