@@ -15,23 +15,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "dev-server-v5000-new"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "dev-server-final"
-
-[[workflows.workflow]]
-name = "dev-server-v5000-new"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev -- -p 5000"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow]]
 name = "dev-server-final"
