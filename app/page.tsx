@@ -34,11 +34,11 @@ export default async function Home() {
   const allTransactions = await CashTransaction.find();
 
   const totalIn = allTransactions
-    .filter((t) => t.type === "IN")
+    .filter((t) => t.type === "DEBIT")
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   const totalOut = allTransactions
-    .filter((t) => t.type === "OUT")
+    .filter((t) => t.type === "CREDIT")
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   const balance = totalIn - totalOut;

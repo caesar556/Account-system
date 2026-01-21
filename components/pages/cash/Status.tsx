@@ -17,8 +17,6 @@ export default function Status() {
     },
     { in: 0, out: 0 },
   );
-
-  // Calculate actual total balance from all treasuries
   const totalBalance = treasuries.reduce(
     (sum, t) => sum + (t.currentBalance || 0),
     0,
