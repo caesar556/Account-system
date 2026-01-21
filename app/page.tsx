@@ -193,7 +193,9 @@ export default async function Home() {
                             ${t.type === "DEBIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
                           `}
                         >
-                          {t.type === "DEBIT" ? "مقبوضات (وارد)" : "مدفوعات (صادر)"}
+                          {t.type === "DEBIT"
+                            ? "مقبوضات (وارد)"
+                            : "مدفوعات (صادر)"}
                         </Badge>
                       </td>
                       <td
@@ -214,9 +216,9 @@ export default async function Home() {
                             className={`w-2 h-2 rounded-full ${t.paymentMethod === "CASH" ? "bg-orange-400" : t.paymentMethod === "TRANSFER" ? "bg-blue-400" : "bg-purple-400"}`}
                           ></span>
                           <span className="text-sm font-bold text-slate-600">
-                            {t.method === "CASH"
+                            {t.paymentMethod === "CASH"
                               ? "نقدي"
-                              : t.method === "TRANSFER"
+                              : t.paymentMethod === "TRANSFER"
                                 ? "تحويل"
                                 : "شيك"}
                           </span>

@@ -56,7 +56,7 @@ export function TransactionFormFields({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="DEBIT" className="text-emerald-600">
-                    وارد (مقبوضات)
+                   وارد (مقبوضات)
                   </SelectItem>
                   <SelectItem value="CREDIT" className="text-rose-600">
                     صادر (مدفوعات)
