@@ -29,7 +29,16 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const customer = await Customer.create(body);
+    
+    // Map status from form (unpaid/paid) if necessary or handle in model
+    // The form sends 'status', but the model uses 'isActive' and we calculate balance.
+    // Let's ensure the body is compatible.
+    const customerData = {
+      ...body,
+      isActive: true, // New customers are active by default
+    };
+    
+    const customer = await Customer.create(customerData);
     return NextResponse.json(customer, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
