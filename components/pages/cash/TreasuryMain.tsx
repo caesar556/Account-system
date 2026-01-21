@@ -173,7 +173,9 @@ export default function TreasuryMain() {
                         {/* Amount */}
                         <TableCell
                           className={`font-bold ${
-                            tx.type === "CREDIT" ? "text-green-600" : "text-red-600"
+                            tx.type === "DEBIT"
+                              ? "text-green-600"
+                              : "text-red-600"
                           }`}
                         >
                           {tx.amount.toLocaleString("ar-EG")} ج.م
@@ -188,9 +190,9 @@ export default function TreasuryMain() {
                         <TableCell className="hidden md:table-cell">
                           <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <Wallet className="h-3.5 w-3.5" />
-                            {tx.method === "CASH"
+                            {tx.paymentMethod === "CASH"
                               ? "نقدي"
-                              : tx.method === "TRANSFER"
+                              : tx.paymentMethod === "TRANSFER"
                                 ? "تحويل"
                                 : "شيك"}
                           </div>

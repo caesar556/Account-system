@@ -55,11 +55,11 @@ export function TransactionFormFields({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="DEBIT" className="text-red-600">
-                    داخل
+                  <SelectItem value="DEBIT" className="text-emerald-600">
+                    وارد (مقبوضات)
                   </SelectItem>
-                  <SelectItem value="CREDIT" className="text-green-600">
-                    خارج
+                  <SelectItem value="CREDIT" className="text-rose-600">
+                    صادر (مدفوعات)
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -257,19 +257,19 @@ export function TransactionFormFields({
                 <SelectContent>
                   <SelectItem value="CASH">
                     <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4 text-green-600" />
+                      <Wallet className="h-4 w-4 text-green-600" />
                       <span>نقدي</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="TRANSFER">
                     <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-blue-600" />
+                      <Banknote className="h-4 w-4 text-orange-700" />
                       <span>تحويل</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="CHEQUE">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-purple-600" />
+                      <CreditCard className="h-4 w-4 text-purple-700" />
                       <span>شيك</span>
                     </div>
                   </SelectItem>

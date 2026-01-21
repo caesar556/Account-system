@@ -193,7 +193,7 @@ export default async function Home() {
                             ${t.type === "DEBIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
                           `}
                         >
-                          {t.type === "DEBIT" ? "وارد (IN)" : "صادر (OUT)"}
+                          {t.type === "DEBIT" ? "مقبوضات (وارد)" : "مدفوعات (صادر)"}
                         </Badge>
                       </td>
                       <td
