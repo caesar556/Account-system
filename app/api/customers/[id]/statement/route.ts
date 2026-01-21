@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import { StatementService } from "@/lib/services/statementService";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } },
-) {
+export async function GET({ params }: { params: { id: string } }) {
   try {
     const { id } = await params;
 

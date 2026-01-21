@@ -33,34 +33,19 @@ const CustomerSchema = new mongoose.Schema(
       min: 0,
     },
 
-    currentBalance: {
-      type: Number,
-      default: 0,
-    },
-
     isActive: {
       type: Boolean,
       default: true,
     },
 
     notes: String,
-
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
   },
   { timestamps: true },
 );
 
-CustomerSchema.virtual("totalDebt").get(function () {
-  return Math.max(0, this.currentBalance);
-});
-
-CustomerSchema.virtual("totalCredit").get(function () {
-  return Math.max(0, -this.currentBalance);
-});
+CustomerSchema.index({ name: 1 });
+CustomerSchema.index({ phone: 1 });
+CustomerSchema.index({ isActive: 1 });
 
 export default mongoose.models.Customer ||
   mongoose.model("Customer", CustomerSchema);

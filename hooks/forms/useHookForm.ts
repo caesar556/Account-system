@@ -1,18 +1,32 @@
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { transactionSchema } from "@/lib/validation/transaction";
+
 import { useCreateTransactionMutation } from "@/store/transactions/transactionsApi";
 import { useGetTreasuriesQuery } from "@/store/treasuries/treasuriesApi";
-import { useGetCustomersQuery } from "@/store/customers/customersApi";
 import {
-  transactionSchema,
-  type TransactionInput,
-} from "@/lib/validation/transaction";
-import { useState, useEffect } from "react";
+  useGetCustomersQuery,
+  useGetCustomerSummaryQuery,
+} from "@/store/customers/customersApi";
+
+import { ICustomer } from "@/lib/types/customer";
+import { ITreasury } from "@/lib/types/treasure";
+import z from "zod";
 
 interface UseTransactionFormProps {
   defaultCustomerId?: string;
   defaultType?: "DEBIT" | "CREDIT";
   onSuccess?: () => void;
+}
+
+function calculateProjectedBalance(
+  currentBalance: number,
+  amount: number,
+  type: "DEBIT" | "CREDIT",
+) {
+  return type === "DEBIT" ? currentBalance + amount : currentBalance - amount;
 }
 
 export function useTransactionForm({
@@ -22,16 +36,17 @@ export function useTransactionForm({
 }: UseTransactionFormProps = {}) {
   const [createTransaction, { isLoading: isSubmitting }] =
     useCreateTransactionMutation();
+
   const { data: treasuriesData, isLoading: loadingTreasuries } =
     useGetTreasuriesQuery();
+
   const { data: customersData, isLoading: loadingCustomers } =
     useGetCustomersQuery();
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
-  const form = useForm<TransactionInput>({
+  const form = useForm<z.input<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: defaultType,
@@ -40,72 +55,103 @@ export function useTransactionForm({
       paymentMethod: "CASH",
       referenceType: "MANUAL",
       treasuryId: "",
-      referenceId: "",
-      customerId: defaultCustomerId || "",
+      referenceId: null,
+      customerId: defaultCustomerId || null,
     },
   });
 
-  const watchCustomerId = form.watch("customerId");
-  const watchAmount = form.watch("amount") || 0;
-  const watchType = form.watch("type");
+  const customerId = useWatch({
+    control: form.control,
+    name: "customerId",
+  });
 
-  // Update selected customer when ID changes
-  useEffect(() => {
-    if (watchCustomerId && customersData?.data) {
-      const customer = customersData.data.find(
-        (c) => c._id === watchCustomerId,
-      );
-      setSelectedCustomer(customer || null);
-    } else {
-      setSelectedCustomer(null);
-    }
-  }, [watchCustomerId, customersData]);
+  const amount = useWatch({
+    control: form.control,
+    name: "amount",
+  });
 
-  // Calculate projected balance
-  const projectedBalance = selectedCustomer
-    ? watchType === "DEBIT"
-      ? selectedCustomer.currentBalance + watchAmount
-      : selectedCustomer.currentBalance - watchAmount
-    : null;
+  const type = useWatch({
+    control: form.control,
+    name: "type",
+  });
 
-  // Check if near credit limit
-  const isNearCreditLimit =
-    selectedCustomer && selectedCustomer.creditLimit > 0
-      ? (selectedCustomer.currentBalance / selectedCustomer.creditLimit) * 100 >
-        70
-      : false;
+  const {
+    data: customerSummary,
+    isLoading: loadingCustomerSummary,
+    refetch: refetchCustomerSummary,
+  } = useGetCustomerSummaryQuery(customerId!, {
+    skip: !customerId || customerId === "NO_CUSTOMER",
+  });
 
-  // Check if exceeds credit limit
-  const exceedsCreditLimit =
-    selectedCustomer && selectedCustomer.creditLimit > 0
-      ? projectedBalance !== null &&
-        projectedBalance > selectedCustomer.creditLimit
-      : false;
+  const customers: ICustomer[] = customersData?.data || [];
+  const treasuries: ITreasury[] = treasuriesData || [];
 
-  const handleSubmit = async (data: TransactionInput) => {
+  const selectedCustomer = useMemo(() => {
+    if (!customerId || customerId === "NO_CUSTOMER") return null;
+    return customers.find((c) => c._id === customerId) || null;
+  }, [customerId, customers]);
+
+  const currentBalance = useMemo(() => {
+    return customerSummary?.balance?.current || 0;
+  }, [customerSummary]);
+
+  const projectedBalance = useMemo(() => {
+    if (customerId === "NO_CUSTOMER" || !customerId) return null;
+    return calculateProjectedBalance(currentBalance, amount, type);
+  }, [selectedCustomer, currentBalance, amount, type]);
+
+  const isNearCreditLimit = useMemo(() => {
+    if (
+      !selectedCustomer ||
+      selectedCustomer.creditLimit <= 0 ||
+      projectedBalance === null
+    )
+      return false;
+
+    return projectedBalance / selectedCustomer.creditLimit >= 0.7;
+  }, [selectedCustomer, projectedBalance]);
+
+  const exceedsCreditLimit = useMemo(() => {
+    if (
+      !selectedCustomer ||
+      selectedCustomer.creditLimit <= 0 ||
+      projectedBalance === null
+    )
+      return false;
+
+    return type === "DEBIT" && projectedBalance > selectedCustomer.creditLimit;
+  }, [selectedCustomer, projectedBalance, type]);
+
+  const handleSubmit = async (data: z.output<typeof transactionSchema>) => {
     setError(null);
     setSuccess(false);
 
     try {
       const payload = {
         ...data,
-        customerId: data.customerId || undefined,
+        customerId:
+          data.customerId === "NO_CUSTOMER" ? undefined : data.customerId,
+        referenceId: data.referenceId ?? undefined,
       };
 
       await createTransaction(payload).unwrap();
 
       setSuccess(true);
-      form.reset();
 
-      if (onSuccess) {
-        setTimeout(onSuccess, 1000);
-      }
+      form.reset({
+        type: defaultType,
+        customerId: defaultCustomerId || "NO_CUSTOMER",
+        amount: 0,
+        description: "",
+        paymentMethod: "CASH",
+        referenceType: "MANUAL",
+        treasuryId: "",
+        referenceId: null,
+      });
 
-      // Auto-hide success
-      setTimeout(() => setSuccess(false), 3000);
+      onSuccess?.();
     } catch (err: any) {
-      setError(err?.data?.error || err.message || "حدث خطأ");
-      console.error("Transaction error:", err);
+      setError(err.error ?? err?.message ?? "حدث خطأ");
     }
   };
 
@@ -119,9 +165,10 @@ export function useTransactionForm({
     projectedBalance,
     isNearCreditLimit,
     exceedsCreditLimit,
-    loadingTreasuries,
     loadingCustomers,
-    treasuries: treasuriesData?.data?.filter((t: any) => t.isActive) || [],
-    customers: customersData?.data?.filter((c: any) => c.isActive) || [],
+    loadingTreasuries,
+    loadingCustomerSummary,
+    customers,
+    treasuries,
   };
 }

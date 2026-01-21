@@ -1,11 +1,14 @@
 import { CashTransaction } from "@/models/CashTransaction";
 import Customer from "@/models/Customer";
-import { Treasury } from "@/models/Treasury";
 import CustomerRecord from "@/models/CustomerRecord";
+import { Treasury } from "@/models/Treasury";
+import mongoose from "mongoose";
 import { CustomerService } from "./customerService";
 
 export class TransactionService {
-  // Create a new transaction
+  /**
+   * Create a financial transaction with full atomicity
+   */
   static async createTransaction(data: {
     treasuryId: string;
     customerId?: string;
@@ -15,93 +18,138 @@ export class TransactionService {
     description: string;
     referenceType: "CUSTOMER_RECORD" | "MANUAL" | "ADJUSTMENT";
     referenceId?: string;
-    createdBy: string;
   }) {
-    // Validate treasury
-    const treasury = await Treasury.findById(data.treasuryId);
-    if (!treasury || !treasury.isActive) {
-      throw new Error("Treasury not available");
+    // Validation
+    if (data.amount <= 0) {
+      throw new Error("Amount must be positive");
     }
 
-    // Validate customer if exists
-    if (data.customerId) {
-      const customer = await Customer.findById(data.customerId);
-      if (!customer || !customer.isActive) {
-        throw new Error("Customer not available");
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // 1. Validate Treasury
+      const treasury = await Treasury.findById(data.treasuryId).session(
+        session,
+      );
+      if (!treasury || !treasury.isActive) {
+        throw new Error("Treasury not available");
       }
 
-      // Check credit limit for DEBIT transactions
-      if (data.type === "DEBIT") {
-        const withinLimit = await CustomerService.checkCreditLimit(
-          data.customerId,
-          data.amount,
+      // 2. Validate Customer (if provided)
+      if (data.customerId) {
+        const customer = await Customer.findById(data.customerId).session(
+          session,
         );
-        if (!withinLimit) {
-          throw new Error(`Exceeds credit limit (${customer.creditLimit})`);
+        if (!customer || !customer.isActive) {
+          throw new Error("Customer not available");
+        }
+
+        // 3. Check Credit Limit for DEBIT transactions
+        if (data.type === "DEBIT" && customer.creditLimit > 0) {
+          const currentBalance = await CustomerService.getCurrentBalance(
+            data.customerId,
+          );
+          const projectedBalance = currentBalance + data.amount;
+
+          if (projectedBalance > customer.creditLimit) {
+            throw new Error(
+              `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
+            );
+          }
         }
       }
-    }
 
-    // Create transaction
-    const transaction = await CashTransaction.create(data);
+      // 4. Check Treasury has sufficient funds for CREDIT (payment out)
+      if (data.type === "CREDIT") {
+        if (treasury.currentBalance < data.amount) {
+          throw new Error(
+            `Insufficient treasury balance. Available: ${treasury.currentBalance}`,
+          );
+        }
+      }
 
-    // Update customer balance if customer exists
-    if (data.customerId) {
-      await CustomerService.updateBalance(
-        data.customerId,
-        data.amount,
-        data.type,
+      // 5. Create Transaction
+      const [transaction] = await CashTransaction.create([data], { session });
+
+      // 6. Update Treasury Balance
+      // DEBIT = Customer takes goods = Money OUT of treasury = DECREASE
+      // CREDIT = Customer pays = Money INTO treasury = INCREASE
+      const treasuryChange = data.type === "DEBIT" ? -data.amount : data.amount;
+
+      await Treasury.findByIdAndUpdate(
+        data.treasuryId,
+        { $inc: { currentBalance: treasuryChange } },
+        { session },
       );
+
+      await session.commitTransaction();
+      return transaction;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    // Update treasury balance
-    const treasuryChange = data.type === "DEBIT" ? data.amount : -data.amount;
-    await Treasury.findByIdAndUpdate(data.treasuryId, {
-      $inc: { currentBalance: treasuryChange },
-    });
-
-    return transaction;
   }
 
-  // Pay a customer record
   static async payRecord(data: {
     recordId: string;
     amount: number;
     treasuryId: string;
     paymentMethod: "CASH" | "TRANSFER" | "CHEQUE";
     description?: string;
-    createdBy: string;
   }) {
-    const record = await CustomerRecord.findById(data.recordId);
-    if (!record) throw new Error("Record not found");
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (record.status === "PAID") {
-      throw new Error("Record already paid");
+    try {
+      const record = await CustomerRecord.findById(data.recordId).session(
+        session,
+      );
+      if (!record) throw new Error("Record not found");
+
+      if (record.status === "PAID") {
+        throw new Error("Record already fully paid");
+      }
+
+      const remaining = record.totalAmount - record.paidAmount;
+
+      if (data.amount <= 0) {
+        throw new Error("Payment amount must be positive");
+      }
+
+      if (data.amount > remaining) {
+        throw new Error(
+          `Payment exceeds remaining balance. Remaining: ${remaining}`,
+        );
+      }
+
+      const transaction = await this.createTransaction({
+        treasuryId: data.treasuryId,
+        customerId: record.customerId.toString(),
+        type: "CREDIT",
+        amount: data.amount,
+        paymentMethod: data.paymentMethod,
+        description: data.description || `Payment for ${record.title}`,
+        referenceType: "CUSTOMER_RECORD",
+        referenceId: record._id.toString(),
+      });
+
+      record.paidAmount += data.amount;
+      record.status =
+        record.paidAmount >= record.totalAmount ? "PAID" : "PARTIAL";
+      await record.save({ session });
+
+      await session.commitTransaction();
+
+      return { transaction, record };
+    } catch (error) {
+      console.log("service error", error);
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    const remaining = record.totalAmount - record.paidAmount;
-    if (data.amount <= 0) throw new Error("Amount must be positive");
-    if (data.amount > remaining) throw new Error("Amount exceeds remaining");
-
-    // Create transaction (CREDIT because customer is paying, reducing their debt)
-    const transaction = await this.createTransaction({
-      treasuryId: data.treasuryId,
-      customerId: record.customerId,
-      type: "CREDIT",
-      amount: data.amount,
-      paymentMethod: data.paymentMethod,
-      description: data.description || `Payment for ${record.title}`,
-      referenceType: "CUSTOMER_RECORD",
-      referenceId: record._id,
-      createdBy: data.createdBy,
-    });
-
-    // Update record
-    record.paidAmount += data.amount;
-    record.status =
-      record.paidAmount >= record.totalAmount ? "PAID" : "PARTIAL";
-    await record.save();
-
-    return { transaction, record };
   }
 }

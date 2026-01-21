@@ -15,7 +15,14 @@ export const transactionSchema = z.object({
   referenceId: z.string().optional().nullable(),
 
   treasuryId: z.string().min(1, "الخزينة مطلوبة"),
-  customerId: z.string().optional().nullable(),
+  customerId: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => val !== "", {
+      message: "اختار عميل أو اتركه فارغ",
+    })
+    .transform((val) => (val === "" ? null : val)),
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;

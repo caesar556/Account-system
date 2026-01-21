@@ -34,5 +34,9 @@ const CustomerRecordSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+CustomerRecordSchema.index({ customerId: 1, status: 1 });
+CustomerRecordSchema.index({ dueDate: 1 });
+CustomerRecordSchema.index({ status: 1 });
+
 export default mongoose.models.CustomerRecord ||
   mongoose.model("CustomerRecord", CustomerRecordSchema);

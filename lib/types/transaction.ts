@@ -11,7 +11,6 @@ export interface ITransaction {
   description: string;
   referenceType: "CUSTOMER_RECORD" | "MANUAL" | "ADJUSTMENT";
   referenceId?: string;
-  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }

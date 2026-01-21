@@ -9,11 +9,11 @@ export default function Status() {
 
   const totals = transactions.reduce(
     (acc: any, tx: any) => {
-      if (tx.type === "IN") acc.in += tx.amount;
-      if (tx.type === "OUT") acc.out += tx.amount;
+      if (tx.type === "DEBIT") acc.in += tx.amount;
+      if (tx.type === "CREDIT") acc.out += tx.amount;
       return acc;
     },
-    { in: 0, out: 0 }
+    { in: 0, out: 0 },
   );
 
   const balance = totals.in - totals.out;

@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 
 const TreasurySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
-
     type: {
       type: String,
       enum: ["CASH", "BANK", "PETTY_CASH"],
@@ -16,15 +14,28 @@ const TreasurySchema = new mongoose.Schema(
       default: "EGP",
     },
 
-    minBalance: { type: Number, default: 0 },
     isDefault: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
 
     closedAt: Date,
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+
+    name: {
+      type: String,
+      required: true,
+      unique: true,
     },
+    initialBalance: {
+      type: Number,
+      default: 0,
+    },
+    currentBalance: {
+      type: Number,
+      default: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    description: String,
   },
   { timestamps: true },
 );

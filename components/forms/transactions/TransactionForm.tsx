@@ -17,11 +17,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Control } from "react-hook-form";
 import { TransactionInput } from "@/lib/validation/transaction";
 import { Banknote, CreditCard, FileText, User, Wallet } from "lucide-react";
-import { ICustomer } from "@/lib/types/customer"
+import { ICustomer } from "@/lib/types/customer";
+import { ITreasury } from "@/lib/types/treasure";
 
 interface TransactionFormFieldsProps {
   control: Control<TransactionInput>;
-  treasuries: Treasury[];
+  treasuries: ITreasury[];
   customers: ICustomer[];
   selectedCustomer: ICustomer | null;
   projectedBalance: number | null;
@@ -40,7 +41,6 @@ export function TransactionFormFields({
 }: TransactionFormFieldsProps) {
   return (
     <div className="space-y-6">
-      {/* Type and Amount */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
@@ -93,7 +93,6 @@ export function TransactionFormFields({
         />
       </div>
 
-      {/* Description */}
       <FormField
         control={control}
         name="description"
@@ -115,7 +114,6 @@ export function TransactionFormFields({
         )}
       />
 
-      {/* Treasury and Customer */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
@@ -163,7 +161,7 @@ export function TransactionFormFields({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="no customer">بدون عميل</SelectItem>
+                  <SelectItem value="NO_CUSTOMER">بدون عميل</SelectItem>
                   {customers.map((customer) => (
                     <SelectItem key={customer._id} value={customer._id}>
                       <div className="flex items-center justify-between w-full">
@@ -186,7 +184,6 @@ export function TransactionFormFields({
         />
       </div>
 
-      {/* Customer Info Panel */}
       {selectedCustomer && (
         <div className="p-4 bg-gray-50 rounded-lg border space-y-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -244,11 +241,10 @@ export function TransactionFormFields({
         </div>
       )}
 
-      {/* Method and Reference */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
-          name="method"
+          name="paymentMethod"
           render={({ field }) => (
             <FormItem>
               <FormLabel>طريقة الدفع</FormLabel>
