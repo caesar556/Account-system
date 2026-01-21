@@ -185,19 +185,19 @@ export default async function Home() {
                     >
                       <td className="px-8 py-5">
                         <Badge
-                          variant={t.type === "IN" ? "outline" : "destructive"}
+                          variant={t.type === "DEBIT" ? "outline" : "destructive"}
                           className={`
                             px-3 py-1 font-bold rounded-full
-                            ${t.type === "IN" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
+                            ${t.type === "DEBIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
                           `}
                         >
-                          {t.type === "IN" ? "وارد (IN)" : "صادر (OUT)"}
+                          {t.type === "DEBIT" ? "وارد (IN)" : "صادر (OUT)"}
                         </Badge>
                       </td>
                       <td
-                        className={`px-8 py-5 text-lg font-black ${t.type === "IN" ? "text-emerald-600" : "text-rose-600"}`}
+                        className={`px-8 py-5 text-lg font-black ${t.type === "DEBIT" ? "text-emerald-600" : "text-rose-600"}`}
                       >
-                        {t.type === "IN" ? "+" : "-"}
+                        {t.type === "DEBIT" ? "+" : "-"}
                         {t.amount.toLocaleString()}
                         <span className="text-xs font-normal mr-1 opacity-70">
                           EGP

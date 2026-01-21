@@ -35,9 +35,9 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 const REASON_LABEL: Record<string, string> = {
-  CUSTOMER_RECORD: "سجل عملاء",
-  MANUAL: "يدوي",
-  ADJUSTMENT: "تسوية",
+  CUSTOMER_RECORD: "تحصيل من عميل",
+  MANUAL: "عملية يدوية",
+  ADJUSTMENT: "تسوية رصيد",
 };
 
 const METHOD_LABEL: Record<string, string> = {
