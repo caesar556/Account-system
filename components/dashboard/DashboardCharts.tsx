@@ -27,13 +27,10 @@ ChartJS.register(
   LineElement
 );
 
-const REASON_MAP: Record<string, string> = {
-  DEAL_PAYMENT: "دفعة صفقة",
-  EXPENSE: "مصروفات",
-  WITHDRAW: "سحب",
-  DEPOSIT: "إيداع",
+const REASON_LABEL_MAP: Record<string, string> = {
+  CUSTOMER_RECORD: "سجل عملاء",
+  MANUAL: "يدوي",
   ADJUSTMENT: "تسوية",
-  OTHER: "أخرى",
 };
 
 const METHOD_MAP: Record<string, string> = {
@@ -55,11 +52,11 @@ export default function DashboardCharts() {
   }
 
   const barData = {
-    labels: data.byType.map((t: any) => t._id === "IN" ? "الوارد" : "المنصرف"),
+    labels: data.byType?.map((t: any) => t._id === "DEBIT" ? "الوارد" : "المنصرف") || [],
     datasets: [
       {
         label: 'التدفق المالي',
-        data: data.byType.map((t: any) => t.total),
+        data: data.byType?.map((t: any) => t.total) || [],
         backgroundColor: ['rgba(34, 197, 94, 0.6)', 'rgba(239, 68, 68, 0.6)'],
         borderColor: ['rgb(34, 197, 94)', 'rgb(239, 68, 68)'],
         borderWidth: 1,
@@ -68,10 +65,10 @@ export default function DashboardCharts() {
   };
 
   const reasonData = {
-    labels: data.byReason.map((r: any) => REASON_MAP[r._id] || r._id),
+    labels: data.byReason?.map((r: any) => REASON_LABEL_MAP[r._id] || r._id) || [],
     datasets: [
       {
-        data: data.byReason.map((r: any) => r.total),
+        data: data.byReason?.map((r: any) => r.total) || [],
         backgroundColor: [
           'rgba(124, 58, 237, 0.6)',
           'rgba(249, 115, 22, 0.6)',
@@ -86,18 +83,18 @@ export default function DashboardCharts() {
   };
 
   const trendData = {
-    labels: data.trends.map((t: any) => t._id),
+    labels: data.trends?.map((t: any) => t._id) || [],
     datasets: [
       {
         label: 'الوارد',
-        data: data.trends.map((t: any) => t.in),
+        data: data.trends?.map((t: any) => t.in) || [],
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.5)',
         tension: 0.3,
       },
       {
         label: 'المنصرف',
-        data: data.trends.map((t: any) => t.out),
+        data: data.trends?.map((t: any) => t.out) || [],
         borderColor: 'rgb(239, 68, 68)',
         backgroundColor: 'rgba(239, 68, 68, 0.5)',
         tension: 0.3,
@@ -126,7 +123,7 @@ export default function DashboardCharts() {
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl border shadow-sm h-[400px]">
-          <h3 className="text-lg font-semibold mb-4 text-right">توزيع المصروفات حسب السبب</h3>
+          <h3 className="text-lg font-semibold mb-4 text-right">توزيع العمليات حسب المصدر</h3>
           <div className="h-[300px]">
             <Pie options={options} data={reasonData} />
           </div>
@@ -141,7 +138,7 @@ export default function DashboardCharts() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {data.byMethod.map((m: any) => (
+        {data.byMethod?.map((m: any) => (
           <div key={m._id} className="bg-white p-4 rounded-xl border shadow-sm flex flex-col items-center justify-center space-y-2">
             <span className="text-sm text-muted-foreground">{METHOD_MAP[m._id] || m._id}</span>
             <span className="text-2xl font-bold text-slate-900">{m.total.toLocaleString("ar-EG")} EGP</span>

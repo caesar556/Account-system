@@ -13,11 +13,11 @@ export async function GET() {
             { $group: { _id: "$type", total: { $sum: "$amount" }, count: { $sum: 1 } } }
           ],
           byReason: [
-            { $group: { _id: "$reason", total: { $sum: "$amount" }, count: { $sum: 1 } } },
+            { $group: { _id: "$referenceType", total: { $sum: "$amount" }, count: { $sum: 1 } } },
             { $sort: { total: -1 } }
           ],
           byMethod: [
-            { $group: { _id: "$method", total: { $sum: "$amount" }, count: { $sum: 1 } } }
+            { $group: { _id: "$paymentMethod", total: { $sum: "$amount" }, count: { $sum: 1 } } }
           ],
           trends: [
             {
@@ -26,10 +26,10 @@ export async function GET() {
                   $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
                 },
                 in: {
-                  $sum: { $cond: [{ $eq: ["$type", "IN"] }, "$amount", 0] }
+                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] }
                 },
                 out: {
-                  $sum: { $cond: [{ $eq: ["$type", "OUT"] }, "$amount", 0] }
+                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] }
                 }
               }
             },
@@ -40,7 +40,7 @@ export async function GET() {
       }
     ]);
 
-    return NextResponse.json(summary[0]);
+    return NextResponse.json(summary[0] || { byType: [], byReason: [], byMethod: [], trends: [] });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
