@@ -45,23 +45,22 @@ export class TransactionService {
           throw new Error("Customer not available");
         }
 
-        // 3. Check Credit Limit for DEBIT transactions
-        if (data.type === "DEBIT" && customer.creditLimit > 0) {
-          const currentBalance = await CustomerService.getCurrentBalance(
-            data.customerId,
-          );
-          const projectedBalance = currentBalance + data.amount;
+      // 3. Check Credit Limit for CREDIT transactions (Customer owes more)
+      if (data.type === "CREDIT" && customer.creditLimit > 0) {
+        const currentBalance = await CustomerService.getCurrentBalance(
+          data.customerId,
+        );
+        const projectedBalance = currentBalance + data.amount;
 
-          if (projectedBalance > customer.creditLimit) {
-            throw new Error(
-              `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
-            );
-          }
+        if (projectedBalance > customer.creditLimit) {
+          throw new Error(
+            `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
+          );
         }
       }
 
-      // 4. Check Treasury has sufficient funds for DEBIT (payment out / expense)
-      if (data.type === "DEBIT") {
+      // 4. Check Treasury has sufficient funds for CREDIT (payment out / expense)
+      if (data.type === "CREDIT") {
         if (treasury.currentBalance < data.amount) {
           throw new Error(
             `رصيد الخزينة غير كافٍ. المتوفر: ${treasury.currentBalance}`,
@@ -73,9 +72,9 @@ export class TransactionService {
       const [transaction] = await CashTransaction.create([data], { session });
 
       // 6. Update Treasury Balance
-      // DEBIT (Red) = OUT (Expense/Debt for customer) = DECREASE Treasury
-      // CREDIT (Green) = IN (Income/Payment from customer) = INCREASE Treasury
-      const treasuryChange = data.type === "CREDIT" ? data.amount : -data.amount;
+      // DEBIT (Green) = IN (Income/Payment from customer) = INCREASE Treasury
+      // CREDIT (Red) = OUT (Expense/Debt for customer) = DECREASE Treasury
+      const treasuryChange = data.type === "DEBIT" ? data.amount : -data.amount;
 
       await Treasury.findByIdAndUpdate(
         data.treasuryId,
@@ -84,12 +83,12 @@ export class TransactionService {
       );
 
       // 7. Update Customer Balance
-      // DEBIT = Debt increases = +Amount
-      // CREDIT = Debt decreases = -Amount
+      // DEBIT = Debt decreases (Payment from customer) = -Amount
+      // CREDIT = Debt increases (Customer owes more) = +Amount
       if (data.customerId) {
         await Customer.findByIdAndUpdate(
           data.customerId,
-          { $inc: { currentBalance: data.type === "DEBIT" ? data.amount : -data.amount } },
+          { $inc: { currentBalance: data.type === "CREDIT" ? data.amount : -data.amount } },
           { session }
         );
       }
@@ -139,7 +138,7 @@ export class TransactionService {
       const transaction = await this.createTransaction({
         treasuryId: data.treasuryId,
         customerId: record.customerId.toString(),
-        type: "CREDIT",
+        type: "DEBIT",
         amount: data.amount,
         paymentMethod: data.paymentMethod,
         description: data.description || `Payment for ${record.title}`,
