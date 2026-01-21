@@ -3,9 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useGetTransactionsQuery } from "@/store/transactions/transactionsApi";
+import { useGetTreasuriesQuery } from "@/store/treasuries/treasuriesApi";
 
 export default function Status() {
   const { data: transactions = [] } = useGetTransactionsQuery();
+  const { data: treasuries = [] } = useGetTreasuriesQuery();
 
   const totals = transactions.reduce(
     (acc: any, tx: any) => {
@@ -16,7 +18,11 @@ export default function Status() {
     { in: 0, out: 0 },
   );
 
-  const balance = totals.in - totals.out;
+  // Calculate actual total balance from all treasuries
+  const totalBalance = treasuries.reduce(
+    (sum, t) => sum + (t.currentBalance || 0),
+    0,
+  );
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -61,7 +67,7 @@ export default function Status() {
       <Card className="shadow-sm border-r-4 border-r-violet-500 bg-violet-50/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-violet-900">
-            الرصيد المتوفر
+            الرصيد المتوفر (في الخزائن)
           </CardTitle>
           <div className="p-2 bg-violet-100 rounded-full">
             <Wallet className="h-4 w-4 text-violet-600" />
@@ -69,9 +75,9 @@ export default function Status() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-violet-700">
-            {balance.toLocaleString("ar-EG")} ج.م
+            {totalBalance.toLocaleString("ar-EG")} ج.م
           </div>
-          <p className="text-xs text-violet-600/70 mt-1">سيولة نقدية جاهزة</p>
+          <p className="text-xs text-violet-600/70 mt-1">إجمالي السيولة النقدية</p>
         </CardContent>
       </Card>
     </div>
