@@ -16,7 +16,7 @@ export async function GET(
         balance: {
           $sum: {
             $cond: [
-              { $eq: ["$type", "IN"] },
+              { $eq: ["$type", "CREDIT"] },
               "$amount",
               { $multiply: ["$amount", -1] },
             ],

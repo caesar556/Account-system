@@ -160,20 +160,20 @@ export default function TreasuryMain() {
                           <Badge
                             variant="outline"
                             className={
-                              tx.type === "IN"
+                              tx.type === "CREDIT"
                                 ? "bg-green-50 text-green-700 border-green-200"
                                 : "bg-red-50 text-red-700 border-red-200"
                             }
                           >
                             <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
-                            {tx.type === "IN" ? "إيداع" : "سحب"}
+                            {tx.type === "CREDIT" ? "إيداع" : "سحب"}
                           </Badge>
                         </TableCell>
 
                         {/* Amount */}
                         <TableCell
                           className={`font-bold ${
-                            tx.type === "IN" ? "text-green-600" : "text-red-600"
+                            tx.type === "CREDIT" ? "text-green-600" : "text-red-600"
                           }`}
                         >
                           {tx.amount.toLocaleString("ar-EG")}
