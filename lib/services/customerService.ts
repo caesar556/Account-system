@@ -10,12 +10,17 @@ export class CustomerService {
    * Negative = We owe customer money (CREDIT > DEBIT)
    */
   static async getCurrentBalance(customerId: string): Promise<number> {
+    const customer = await Customer.findById(customerId);
+    if (!customer) return 0;
+    
+    const openingBalance = (customer as any).currentBalance || 0;
+
     const result = await CashTransaction.aggregate([
       { $match: { customerId: new Types.ObjectId(customerId) } },
       {
         $group: {
           _id: null,
-          balance: {
+          txBalance: {
             $sum: {
               $cond: [
                 { $eq: ["$type", "DEBIT"] },
@@ -28,7 +33,10 @@ export class CustomerService {
       },
     ]);
 
-    return result[0]?.balance || 0;
+    const txBalance = result[0]?.txBalance || 0;
+    
+    // Total balance = Opening Balance + (Debits - Credits)
+    return openingBalance + txBalance;
   }
 
 

@@ -28,14 +28,16 @@ export class StatementService {
       CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean(),
     ]);
 
+    const openingBalance = (customer as any).currentBalance || 0;
+
     const events = [
       {
         id: "opening",
         date: customer.createdAt,
         type: "OPENING_BALANCE" as const,
         title: "رصيد افتتاحي",
-        debit: Math.max(0, customer.currentBalance),
-        credit: Math.max(0, -customer.currentBalance),
+        debit: openingBalance >= 0 ? openingBalance : 0,
+        credit: openingBalance < 0 ? Math.abs(openingBalance) : 0,
       },
 
       ...records.map((record) => ({
@@ -74,7 +76,7 @@ export class StatementService {
 
     return {
       customer,
-      openingBalance: customer.currentBalance,
+      openingBalance,
       currentBalance: balance,
       statement,
     };
