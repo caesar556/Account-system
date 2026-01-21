@@ -31,7 +31,7 @@ export default function Status() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-700">
-            {totals.in.toLocaleString("ar-EG")} ر.س
+            {totals.in.toLocaleString("ar-EG")} ج.م
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             إجمالي المبالغ الواردة
@@ -50,7 +50,7 @@ export default function Status() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-700">
-            {totals.out.toLocaleString("ar-EG")} ر.س
+            {totals.out.toLocaleString("ar-EG")} ج.م
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             إجمالي المبالغ الصادرة
@@ -69,7 +69,7 @@ export default function Status() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-violet-700">
-            {balance.toLocaleString("ar-EG")} ر.س
+            {balance.toLocaleString("ar-EG")} ج.م
           </div>
           <p className="text-xs text-violet-600/70 mt-1">سيولة نقدية جاهزة</p>
         </CardContent>

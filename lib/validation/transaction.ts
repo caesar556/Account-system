@@ -19,10 +19,7 @@ export const transactionSchema = z.object({
     .string()
     .optional()
     .nullable()
-    .refine((val) => val !== "", {
-      message: "اختار عميل أو اتركه فارغ",
-    })
-    .transform((val) => (val === "" ? null : val)),
+    .transform((val) => (val === "" || val === "NO_CUSTOMER" ? null : val)),
 });
 
 export type TransactionInput = z.infer<typeof transactionSchema>;

@@ -68,18 +68,18 @@ export function useTransactionForm({
   const amount = useWatch({
     control: form.control,
     name: "amount",
-  });
+  }) as number;
 
   const type = useWatch({
     control: form.control,
     name: "type",
-  });
+  }) as "DEBIT" | "CREDIT";
 
   const {
     data: customerSummary,
     isLoading: loadingCustomerSummary,
     refetch: refetchCustomerSummary,
-  } = useGetCustomerSummaryQuery(customerId!, {
+  } = useGetCustomerSummaryQuery((customerId as string) || "", {
     skip: !customerId || customerId === "NO_CUSTOMER",
   });
 

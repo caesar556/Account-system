@@ -80,7 +80,7 @@ export default function AddTransactionForm({
             <Button
               type="submit"
               disabled={
-                isSubmitting || (selectedCustomer && exceedsCreditLimit)
+                isSubmitting || (selectedCustomer ? exceedsCreditLimit : false)
               }
               className="w-full"
               size="lg"

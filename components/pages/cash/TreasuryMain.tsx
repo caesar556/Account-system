@@ -176,7 +176,7 @@ export default function TreasuryMain() {
                             tx.type === "CREDIT" ? "text-green-600" : "text-red-600"
                           }`}
                         >
-                          {tx.amount.toLocaleString("ar-EG")}
+                          {tx.amount.toLocaleString("ar-EG")} ج.م
                         </TableCell>
 
                         {/* Description */}
