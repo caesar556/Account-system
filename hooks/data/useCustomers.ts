@@ -9,10 +9,10 @@ export function useCustomers() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [balanceFilter, setBalanceFilter] = useState("all");
 
-  const { data: customers = [], isLoading, error } = useGetCustomersQuery();
+  const { data: customers = [], isLoading, error, refetch } = useGetCustomersQuery();
 
   const filteredCustomers = useMemo(() => {
-    return customers.filter((c: any) => {
+    return (Array.isArray(customers) ? customers : []).filter((c: any) => {
       const matchesSearch =
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         (c.phone && c.phone.includes(search)) ||
@@ -26,11 +26,12 @@ export function useCustomers() {
       const matchesCategory =
         categoryFilter === "all" || c.category === categoryFilter;
 
+      const balance = c.currentBalance || 0;
       const matchesBalance =
         balanceFilter === "all" ||
-        (balanceFilter === "debt" && c.currentBalance > 0) ||
-        (balanceFilter === "credit" && c.currentBalance < 0) ||
-        (balanceFilter === "clear" && c.currentBalance === 0);
+        (balanceFilter === "debt" && balance > 0) ||
+        (balanceFilter === "credit" && balance < 0) ||
+        (balanceFilter === "clear" && balance === 0);
 
       return (
         matchesSearch && matchesStatus && matchesCategory && matchesBalance
@@ -39,19 +40,20 @@ export function useCustomers() {
   }, [customers, search, statusFilter, categoryFilter, balanceFilter]);
 
   const stats = useMemo(() => {
-    const totalCustomers = customers.length;
-    const activeCustomers = customers.filter((c: any) => c.isActive).length;
-    const totalDebt = customers.reduce(
+    const customerList = Array.isArray(customers) ? customers : [];
+    const totalCustomers = customerList.length;
+    const activeCustomers = customerList.filter((c: any) => c.isActive).length;
+    const totalDebt = customerList.reduce(
       (sum: number, c: any) =>
         sum + (c.currentBalance > 0 ? c.currentBalance : 0),
       0,
     );
-    const totalCredit = customers.reduce(
+    const totalCredit = customerList.reduce(
       (sum: number, c: any) =>
-        sum + (c.currentBalance < 0 ? -c.currentBalance : 0),
+        sum + (c.currentBalance < 0 ? Math.abs(c.currentBalance) : 0),
       0,
     );
-    const vipCustomers = customers.filter(
+    const vipCustomers = customerList.filter(
       (c: any) => c.category === "vip",
     ).length;
 
@@ -79,5 +81,6 @@ export function useCustomers() {
     setCategoryFilter,
     balanceFilter,
     setBalanceFilter,
+    refetch,
   };
 }
