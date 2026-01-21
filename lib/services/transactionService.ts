@@ -60,11 +60,11 @@ export class TransactionService {
         }
       }
 
-      // 4. Check Treasury has sufficient funds for CREDIT (payment out)
-      if (data.type === "CREDIT") {
+      // 4. Check Treasury has sufficient funds for DEBIT (payment out / expense)
+      if (data.type === "DEBIT") {
         if (treasury.currentBalance < data.amount) {
           throw new Error(
-            `Insufficient treasury balance. Available: ${treasury.currentBalance}`,
+            `رصيد الخزينة غير كافٍ. المتوفر: ${treasury.currentBalance}`,
           );
         }
       }

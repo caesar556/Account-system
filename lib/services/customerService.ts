@@ -106,11 +106,12 @@ export class CustomerService {
   static async checkCreditLimit(
     customerId: string,
     additionalAmount: number,
+    type: "DEBIT" | "CREDIT" = "DEBIT"
   ): Promise<boolean> {
     const customer = await Customer.findById(customerId);
     if (!customer) throw new Error("Customer not found");
 
-    if (customer.creditLimit <= 0) return true;
+    if (customer.creditLimit <= 0 || type === "CREDIT") return true;
 
     const currentBalance = await this.getCurrentBalance(customerId);
     const projectedBalance = currentBalance + additionalAmount;
