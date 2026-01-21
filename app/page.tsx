@@ -185,7 +185,9 @@ export default async function Home() {
                     >
                       <td className="px-8 py-5">
                         <Badge
-                          variant={t.type === "DEBIT" ? "outline" : "destructive"}
+                          variant={
+                            t.type === "DEBIT" ? "outline" : "destructive"
+                          }
                           className={`
                             px-3 py-1 font-bold rounded-full
                             ${t.type === "DEBIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
@@ -209,7 +211,7 @@ export default async function Home() {
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`w-2 h-2 rounded-full ${t.method === "CASH" ? "bg-orange-400" : t.method === "TRANSFER" ? "bg-blue-400" : "bg-purple-400"}`}
+                            className={`w-2 h-2 rounded-full ${t.paymentMethod === "CASH" ? "bg-orange-400" : t.paymentMethod === "TRANSFER" ? "bg-blue-400" : "bg-purple-400"}`}
                           ></span>
                           <span className="text-sm font-bold text-slate-600">
                             {t.method === "CASH"

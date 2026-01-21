@@ -56,10 +56,10 @@ export function TransactionFormFields({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="DEBIT" className="text-red-600">
-                    مدين (زيادة دين)
+                    داخل
                   </SelectItem>
                   <SelectItem value="CREDIT" className="text-green-600">
-                    دائن (تخفيض دين)
+                    خارج
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -257,19 +257,19 @@ export function TransactionFormFields({
                 <SelectContent>
                   <SelectItem value="CASH">
                     <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4" />
+                      <Banknote className="h-4 w-4 text-green-600" />
                       <span>نقدي</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="TRANSFER">
                     <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4" />
+                      <Wallet className="h-4 w-4 text-blue-600" />
                       <span>تحويل</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="CHEQUE">
                     <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
+                      <FileText className="h-4 w-4 text-purple-600" />
                       <span>شيك</span>
                     </div>
                   </SelectItem>
