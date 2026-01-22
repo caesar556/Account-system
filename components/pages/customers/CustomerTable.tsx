@@ -94,8 +94,8 @@ export default function CustomerTable() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="text-right w-[300px]">العميل</TableHead>
-                <TableHead className="text-right">معلومات التواصل</TableHead>
+                <TableHead className="text-right w-[250px]">العميل</TableHead>
+                <TableHead className="text-right">التواصل</TableHead>
                 <TableHead className="text-right">الفئة</TableHead>
                 <TableHead className="text-right">الحالة المالية</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
@@ -110,6 +110,7 @@ export default function CustomerTable() {
                   const initials = customer.name
                     ? customer.name
                         .split(" ")
+                        .filter((n: string) => n)
                         .map((n: string) => n[0])
                         .join("")
                         .toUpperCase()
@@ -117,18 +118,18 @@ export default function CustomerTable() {
                     : "??";
 
                   return (
-                    <TableRow key={customer._id} className="hover:bg-muted/30">
-                      <TableCell>
+                    <TableRow key={customer._id} className="hover:bg-muted/30 transition-colors">
+                      <TableCell className="py-4">
                         <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback className="bg-primary/10 text-primary">
+                          <Avatar className="h-10 w-10 border border-primary/10">
+                            <AvatarFallback className="bg-primary/5 text-primary font-bold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="font-bold">{customer.name}</div>
+                          <div className="flex flex-col">
+                            <div className="font-bold text-base">{customer.name}</div>
                             {customer.notes && (
-                              <div className="text-sm text-muted-foreground line-clamp-1 max-w-[200px]">
+                              <div className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
                                 {customer.notes}
                               </div>
                             )}
@@ -137,25 +138,17 @@ export default function CustomerTable() {
                       </TableCell>
 
                       <TableCell>
-                        <div className="space-y-1">
+                        <div className="flex flex-col gap-1 text-sm">
                           {customer.phone && (
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
                               <Phone className="h-3 w-3" />
                               {customer.phone}
                             </div>
                           )}
-                          {customer.email && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className="h-3 w-3" />
-                              <span className="truncate max-w-[150px]">
-                                {customer.email}
-                              </span>
-                            </div>
-                          )}
                           {customer.address && (
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" />
-                              <span className="truncate max-w-[150px]">
+                              <span className="truncate max-w-[120px]">
                                 {customer.address}
                               </span>
                             </div>
@@ -168,10 +161,10 @@ export default function CustomerTable() {
                           variant="outline"
                           className={
                             customer.category === "vip"
-                              ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
                               : customer.category === "wholesale"
-                                ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400"
-                                : ""
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : "bg-slate-50 text-slate-700 border-slate-200"
                           }
                         >
                           {customer.category === "vip" && "VIP"}
@@ -181,9 +174,9 @@ export default function CustomerTable() {
                       </TableCell>
 
                       <TableCell>
-                        <div className="space-y-1">
-                          <span
-                            className={`font-bold text-lg ${
+                        <div className="flex flex-col gap-1">
+                          <div
+                            className={`font-bold text-base ${
                               balance > 0
                                 ? "text-red-600"
                                 : balance < 0
@@ -191,64 +184,50 @@ export default function CustomerTable() {
                                   : "text-muted-foreground"
                             }`}
                           >
-                            {balance.toLocaleString()} ج.م
-                          </span>
-                          <div className="text-xs text-muted-foreground">
+                            {Math.abs(balance).toLocaleString()} ج.م
+                          </div>
+                          <div className="flex items-center gap-1.5">
                             {balance > 0 ? (
-                              <span className="flex items-center gap-1">
-                                <CreditCard className="h-3 w-3" />
+                              <Badge variant="outline" className="text-[10px] h-5 bg-red-50 text-red-700 border-red-100 px-1 font-bold">
                                 عليه
-                              </span>
+                              </Badge>
                             ) : balance < 0 ? (
-                              <span className="flex items-center gap-1 text-green-600">
-                                <TrendingUp className="h-3 w-3" />
+                              <Badge variant="outline" className="text-[10px] h-5 bg-green-50 text-green-700 border-green-100 px-1 font-bold">
                                 له
-                              </span>
+                              </Badge>
                             ) : (
-                              <span className="flex items-center gap-1">
-                                <CheckCircle className="h-3 w-3" />
-                                خلاص
-                              </span>
+                              <Badge variant="outline" className="text-[10px] h-5 bg-slate-50 text-slate-500 border-slate-100 px-1">
+                                متوازن
+                              </Badge>
                             )}
                           </div>
-                          {customer.creditLimit > 0 && (
-                            <div className="text-xs">
-                              الحد الائتماني:{" "}
-                              {customer.creditLimit.toLocaleString()} ج.م
-                            </div>
-                          )}
                         </div>
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          {customer.isActive ? (
-                            <Badge className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400">
-                              <CheckCircle className="h-3 w-3 ml-1" />
-                              نشط
-                            </Badge>
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className="text-muted-foreground"
-                            >
-                              <XCircle className="h-3 w-3 ml-1" />
-                              غير نشط
-                            </Badge>
-                          )}
-                        </div>
+                        {customer.isActive ? (
+                          <div className="flex items-center gap-1.5 text-green-600">
+                            <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse" />
+                            <span className="text-xs font-bold">نشط</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <div className="h-2 w-2 rounded-full bg-muted-foreground" />
+                            <span className="text-xs font-bold">معطل</span>
+                          </div>
+                        )}
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex items-center gap-2 justify-end">
+                        <div className="flex items-center gap-2 justify-end px-2">
                           <Link href={`/customers/${customer._id}/statement`}>
                             <Button
                               size="sm"
-                              variant="outline"
-                              className="gap-1"
+                              variant="ghost"
+                              className="h-8 text-primary hover:text-primary hover:bg-primary/5 font-bold"
                             >
-                              <FileText className="h-4 w-4" />
-                              التفاصيل
+                              <FileText className="ml-1.5 h-4 w-4" />
+                              كشف الحساب
                             </Button>
                           </Link>
 

@@ -154,22 +154,22 @@ export default function CustomerStatement({
           </CardHeader>
           <CardContent>
             <div
-              className={`text-3xl font-black ${currentBalance > 0 ? "text-destructive" : "text-emerald-600"}`}
+              className={`text-3xl font-black ${currentBalance > 0 ? "text-destructive" : currentBalance < 0 ? "text-emerald-600" : "text-muted-foreground"}`}
             >
               {Math.abs(currentBalance).toLocaleString()}{" "}
               <span className="text-sm font-bold text-muted-foreground">
-                د.ع
+                ج.م
               </span>
             </div>
             <p className="text-xs font-bold text-muted-foreground mt-2 flex items-center">
               <span
-                className={`h-2 w-2 rounded-full ml-1.5 ${currentBalance > 0 ? "bg-destructive" : "bg-emerald-500"}`}
+                className={`h-2 w-2 rounded-full ml-1.5 ${currentBalance > 0 ? "bg-destructive" : currentBalance < 0 ? "bg-emerald-500" : "bg-slate-300"}`}
               ></span>
               {currentBalance > 0
-                ? "عليه"
+                ? "عليه (مدين)"
                 : currentBalance < 0
-                  ? "له"
-                  : "الرصيد مصفر"}
+                  ? "له (دائن)"
+                  : "الرصيد متوازن"}
             </p>
           </CardContent>
         </Card>
@@ -218,25 +218,25 @@ export default function CustomerStatement({
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-muted/50">
+              <TableHeader className="bg-muted/50 border-b-2">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[140px] font-bold text-primary text-right">
+                  <TableHead className="w-[120px] font-bold text-primary text-right">
                     التاريخ
                   </TableHead>
-                  <TableHead className="font-bold text-primary text-right">
-                    التفاصيل والوصف
+                  <TableHead className="min-w-[200px] font-bold text-primary text-right">
+                    التفاصيل والبيان
                   </TableHead>
-                  <TableHead className="font-bold text-primary text-right">
+                  <TableHead className="w-[150px] font-bold text-primary text-center">
                     نوع العملية
                   </TableHead>
-                  <TableHead className="text-left font-bold text-primary">
-                    عليه
+                  <TableHead className="w-[120px] text-center font-bold text-destructive">
+                    مدين (عليه)
                   </TableHead>
-                  <TableHead className="text-left font-bold text-primary">
-                    له
+                  <TableHead className="w-[120px] text-center font-bold text-emerald-600">
+                    دائن (له)
                   </TableHead>
-                  <TableHead className="text-left font-bold text-primary text-lg">
-                    الرصيد
+                  <TableHead className="w-[150px] text-left font-black text-primary border-r bg-primary/5">
+                    الرصيد التراكمي
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -256,60 +256,55 @@ export default function CustomerStatement({
                   filteredStatement.map((entry: any, idx: number) => (
                     <TableRow
                       key={entry.id}
-                      className={`${idx % 2 === 0 ? "bg-transparent" : "bg-muted/10"} hover:bg-muted/20 transition-colors`}
+                      className={`${idx % 2 === 0 ? "bg-transparent" : "bg-muted/5"} hover:bg-muted/10 transition-colors border-b`}
                     >
-                      <TableCell className="font-bold text-muted-foreground whitespace-nowrap">
+                      <TableCell className="font-medium text-muted-foreground py-4">
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-3 w-3 text-primary/40" />
-                          {format(new Date(entry.date), "yyyy/MM/dd", {
-                            locale: ar,
-                          })}
+                          <Calendar className="h-3.5 w-3.5 text-primary/40" />
+                          <span className="tabular-nums">
+                            {format(new Date(entry.date), "yyyy/MM/dd", {
+                              locale: ar,
+                            })}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <span className="font-black text-foreground">
+                          <span className="font-bold text-foreground">
                             {entry.title}
                           </span>
                           {entry.description && (
-                            <span className="text-sm text-muted-foreground font-medium">
+                            <span className="text-xs text-muted-foreground leading-relaxed">
                               {entry.description}
                             </span>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         <Badge
                           variant="outline"
-                          className={`rounded-lg px-2 py-0.5 border-2 ${
+                          className={`rounded-md px-2 py-1 font-bold border ${
                             entry.type === "INVOICE"
-                              ? "border-blue-200 bg-blue-50 text-blue-700"
-                              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              ? "border-blue-200 bg-blue-50/50 text-blue-700"
+                              : "border-emerald-200 bg-emerald-50/50 text-emerald-700"
                           }`}
                         >
-                          {entry.type === "INVOICE" ? (
-                            <>
-                              <ArrowUpRight className="ml-1 h-3.5 w-3.5" />{" "}
-                              فاتورة
-                            </>
-                          ) : (
-                            <>
-                              <ArrowDownLeft className="ml-1 h-3.5 w-3.5" />{" "}
-                              دفعة مالية
-                            </>
-                          )}
+                          {entry.type === "INVOICE" ? "فاتورة" : "دفعة نقدية"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-left font-bold text-destructive">
+                      <TableCell className="text-center font-bold text-destructive tabular-nums text-base">
                         {entry.debit > 0 ? entry.debit.toLocaleString() : "-"}
                       </TableCell>
-                      <TableCell className="text-left font-bold text-emerald-600">
+                      <TableCell className="text-center font-bold text-emerald-600 tabular-nums text-base">
                         {entry.credit > 0 ? entry.credit.toLocaleString() : "-"}
                       </TableCell>
                       <TableCell
-                        className={`text-left font-black text-lg ${entry.balance > 0 ? "text-destructive" : "text-emerald-600"}`}
+                        className={`text-left font-black text-lg border-r bg-primary/5 tabular-nums ${entry.balance > 0 ? "text-destructive" : entry.balance < 0 ? "text-emerald-600" : "text-muted-foreground"}`}
                       >
                         {Math.abs(entry.balance).toLocaleString()}
+                        <span className="text-[10px] mr-1 opacity-60">
+                          {entry.balance > 0 ? "مدين" : entry.balance < 0 ? "دائن" : ""}
+                        </span>
                       </TableCell>
                     </TableRow>
                   ))
