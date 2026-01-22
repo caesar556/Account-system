@@ -86,10 +86,6 @@ export function useTransactionForm({
   const customers: ICustomer[] = customersData || [];
   const treasuries: ITreasury[] = treasuriesData || [];
 
-  console.log("customerData", customerSummary);
-
-  console.log("customerData", customersData);
-
   const selectedCustomer = useMemo(() => {
     if (!customerId || customerId === "NO_CUSTOMER") return null;
     return customers.find((c) => c._id === customerId) || null;

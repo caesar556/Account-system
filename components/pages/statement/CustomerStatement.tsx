@@ -215,7 +215,7 @@ export default function CustomerStatement({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-2">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-muted/50 border-b-2">
@@ -299,7 +299,7 @@ export default function CustomerStatement({
                         {entry.credit > 0 ? entry.credit.toLocaleString() : "-"}
                       </TableCell>
                       <TableCell
-                        className={`text-left font-black text-lg border-r bg-primary/5 tabular-nums ${entry.balance > 0 ? "text-destructive" : entry.balance < 0 ? "text-emerald-600" : "text-muted-foreground"}`}
+                        className={`text-left font-black text-lg border-r  tabular-nums ${entry.balance > 0 ? "text-destructive" : entry.balance < 0 ? "text-emerald-600" : "text-muted-foreground"}`}
                       >
                         {Math.abs(entry.balance).toLocaleString()}
                         <span className="text-[10px] mr-1 opacity-60">

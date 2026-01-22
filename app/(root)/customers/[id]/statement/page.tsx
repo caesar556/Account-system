@@ -1,4 +1,4 @@
-import CustomerStatement from "@/components/pages/CustomerStatement";
+import CustomerStatement from "@/components/pages/statement/CustomerStatement";
 
 interface PageProps {
   params: Promise<{ id: string }>;
