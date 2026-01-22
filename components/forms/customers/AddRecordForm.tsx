@@ -32,7 +32,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
       customerId,
       title: "",
       description: "",
-      totalAmount: 1,
+      totalAmount: 0,
       paidAmount: 0,
       status: "OPEN",
       dueDate: undefined,

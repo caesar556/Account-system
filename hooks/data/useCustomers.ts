@@ -45,12 +45,12 @@ export function useCustomers() {
     const activeCustomers = customerList.filter((c: any) => c.isActive).length;
     const totalDebt = customerList.reduce(
       (sum: number, c: any) =>
-        sum + (c.currentBalance > 0 ? c.currentBalance : 0),
+        sum + (c.currentBalance > 0 ? Number(c.currentBalance) : 0),
       0,
     );
     const totalCredit = customerList.reduce(
       (sum: number, c: any) =>
-        sum + (c.currentBalance < 0 ? Math.abs(c.currentBalance) : 0),
+        sum + (c.currentBalance < 0 ? Math.abs(Number(c.currentBalance)) : 0),
       0,
     );
     const vipCustomers = customerList.filter(
