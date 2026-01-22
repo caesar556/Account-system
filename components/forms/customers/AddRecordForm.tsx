@@ -84,6 +84,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
                   <Input 
                   type="number" 
                   {...field} 
+                  value={field.value as number}
                   onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
                 />
                 </FormControl>
@@ -102,6 +103,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
                   <Input 
                   type="number" 
                   {...field} 
+                  value={field.value as number}
                   onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
                 />
                 </FormControl>
@@ -139,7 +141,10 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700">
+        <Button
+          type="submit"
+          className="w-full bg-violet-600 hover:bg-violet-700"
+        >
           إضافة السجل
         </Button>
       </form>
