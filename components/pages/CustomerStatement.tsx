@@ -126,7 +126,7 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
             </div>
             <p className="text-xs font-bold text-muted-foreground mt-2 flex items-center">
               <span className={`h-2 w-2 rounded-full ml-1.5 ${currentBalance > 0 ? 'bg-destructive' : 'bg-emerald-500'}`}></span>
-              {currentBalance > 0 ? 'مستحق (مدين)' : currentBalance < 0 ? 'رصيد دائن' : 'الرصيد مصفر'}
+              {currentBalance > 0 ? 'عليه' : currentBalance < 0 ? 'له' : 'الرصيد مصفر'}
             </p>
           </CardContent>
         </Card>
@@ -172,8 +172,8 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
                   <TableHead className="w-[140px] font-bold text-primary text-right">التاريخ</TableHead>
                   <TableHead className="font-bold text-primary text-right">التفاصيل والوصف</TableHead>
                   <TableHead className="font-bold text-primary text-right">نوع العملية</TableHead>
-                  <TableHead className="text-left font-bold text-primary">مدين (له)</TableHead>
-                  <TableHead className="text-left font-bold text-primary">دائن (عليه)</TableHead>
+                  <TableHead className="text-left font-bold text-primary">عليه</TableHead>
+                  <TableHead className="text-left font-bold text-primary">له</TableHead>
                   <TableHead className="text-left font-bold text-primary text-lg">الرصيد</TableHead>
                 </TableRow>
               </TableHeader>
@@ -227,7 +227,7 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
                         {entry.credit > 0 ? entry.credit.toLocaleString() : "-"}
                       </TableCell>
                       <TableCell className={`text-left font-black text-lg ${entry.balance > 0 ? 'text-destructive' : 'text-emerald-600'}`}>
-                        {entry.balance.toLocaleString()}
+                        {Math.abs(entry.balance).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))
