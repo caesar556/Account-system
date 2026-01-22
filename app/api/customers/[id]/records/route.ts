@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const records = await CustomerRecord.find({ customerId: id })
       .sort({ createdAt: -1 })
       .lean();
@@ -24,7 +24,7 @@ export async function POST(
 ) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const record = await CustomerRecord.create({
       ...body,

@@ -8,6 +8,7 @@ export async function POST(
 ) {
   try {
     await dbConnect();
+    const { id } = await params;
     const body = await request.json();
     const result = await TransactionService.payRecord({
       recordId: body.recordId,
