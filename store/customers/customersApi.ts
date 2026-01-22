@@ -24,6 +24,11 @@ export const customersApi = apiSlice.injectEndpoints({
       query: (customerId) => `/customers/${customerId}/summary`,
       providesTags: ["Statements"],
     }),
+
+    getCustomerRecords: builder.query<any[], string>({
+      query: (customerId) => `/customers/${customerId}/records`,
+      providesTags: ["Transactions"],
+    }),
   }),
 });
 
@@ -32,4 +37,5 @@ export const {
   useCreateCustomerMutation,
   useGetCustomerStatementQuery,
   useGetCustomerSummaryQuery,
+  useGetCustomerRecordsQuery,
 } = customersApi;
