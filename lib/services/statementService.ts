@@ -1,84 +1,77 @@
-import { CashTransaction } from "@/models/CashTransaction";
-import CustomerRecord from "@/models/CustomerRecord";
 import Customer from "@/models/Customer";
+import CustomerRecord from "@/models/CustomerRecord";
+import { CashTransaction } from "@/models/CashTransaction";
 
-export interface IStatementEntry {
+export interface StatementEntry {
   id: string;
   date: Date;
-  type: "RECORD" | "TRANSACTION" | "OPENING_BALANCE";
+  type: "INVOICE" | "PAYMENT" | "TRANSACTION";
   title: string;
   description?: string;
   debit: number;
   credit: number;
   balance: number;
+  referenceId?: string;
 }
 
 export class StatementService {
-  static async generateStatement(customerId: string): Promise<{
+  static async generate(customerId: string): Promise<{
     customer: any;
-    openingBalance: number;
+    statement: StatementEntry[];
     currentBalance: number;
-    statement: IStatementEntry[];
   }> {
     const customer = await Customer.findById(customerId).lean();
     if (!customer) throw new Error("Customer not found");
 
-    const [transactions, records] = await Promise.all([
-      CashTransaction.find({ customerId }).sort({ createdAt: 1 }).lean(),
-      CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean(),
+    const [records, transactions] = await Promise.all([
+      CustomerRecord.find({ customerId }).lean(),
+      CashTransaction.find({ customerId }).lean(),
     ]);
 
-    const openingBalance = (customer as any).currentBalance || 0;
+    // 1️⃣ حوّل الفواتير Entries
+    const invoiceEntries = records.map((record) => ({
+      id: record._id.toString(),
+      date: record.createdAt,
+      type: "INVOICE" as const,
+      title: record.title,
+      description: record.description,
+      debit: record.totalAmount,
+      credit: 0,
+      referenceId: record._id.toString(),
+    }));
 
-    const events = [
-      {
-        id: "opening",
-        date: customer.createdAt,
-        type: "OPENING_BALANCE" as const,
-        title: "رصيد افتتاحي",
-        debit: openingBalance >= 0 ? openingBalance : 0,
-        credit: openingBalance < 0 ? Math.abs(openingBalance) : 0,
-      },
+    // 2️⃣ حوّل المعاملات Entries
+    const transactionEntries = transactions.map((tx) => ({
+      id: tx._id.toString(),
+      date: tx.createdAt,
+      type: "PAYMENT" as const,
+      title: tx.description,
+      description: tx.paymentMethod,
+      debit: tx.type === "DEBIT" ? tx.amount : 0,
+      credit: tx.type === "CREDIT" ? tx.amount : 0,
+      referenceId: tx.referenceId,
+    }));
 
-      ...records.map((record) => ({
-        id: record._id.toString(),
-        date: record.createdAt,
-        type: "RECORD" as const,
-        title: record.title,
-        description: record.description,
-        debit: record.totalAmount,
-        credit: 0,
-        status: record.status,
-        paidAmount: record.paidAmount,
-      })),
+    // 3️⃣ دمج + ترتيب
+    const events = [...invoiceEntries, ...transactionEntries].sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
 
-      ...transactions.map((tx) => ({
-        id: tx._id.toString(),
-        date: tx.createdAt,
-        type: "TRANSACTION" as const,
-        title: tx.description,
-        description: tx.paymentMethod,
-        debit: tx.type === "DEBIT" ? tx.amount : 0,
-        credit: tx.type === "CREDIT" ? tx.amount : 0,
-        referenceId: tx.referenceId,
-      })),
-    ].sort((a, b) => a.date.getTime() - b.date.getTime());
-
+    // 4️⃣ Running balance
     let balance = 0;
-    const statement = events.map((event) => {
-      balance = balance + event.debit - event.credit;
-
-      return {
-        ...event,
-        balance,
-      };
+    const statement = events.map((e) => {
+      balance = balance + e.debit - e.credit;
+      return { ...e, balance };
     });
 
     return {
-      customer,
-      openingBalance,
-      currentBalance: balance,
+      customer: {
+        _id: customer._id,
+        name: customer.name,
+        phone: customer.phone,
+      },
       statement,
+      currentBalance: balance,
     };
   }
 }

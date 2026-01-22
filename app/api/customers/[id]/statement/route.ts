@@ -12,7 +12,7 @@ export async function GET({ params }: { params: { id: string } }) {
       );
     }
 
-    const statement = await StatementService.generateStatement(id);
+    const statement = await StatementService.generate(id);
 
     return NextResponse.json(statement);
   } catch (error: any) {
