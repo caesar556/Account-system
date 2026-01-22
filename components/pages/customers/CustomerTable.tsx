@@ -241,7 +241,7 @@ export default function CustomerTable() {
 
                       <TableCell>
                         <div className="flex items-center gap-2 justify-end">
-                          <Link href={`/customers/${customer._id}`}>
+                          <Link href={`/customers/${customer._id}/statement`}>
                             <Button
                               size="sm"
                               variant="outline"

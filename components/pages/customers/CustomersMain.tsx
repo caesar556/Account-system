@@ -5,7 +5,6 @@ import CustomerStats from "./CustomerStats";
 
 import { useCustomers } from "@/hooks/data/useCustomers";
 import CustomerTable from "./CustomerTable";
-import CustomerFooter from "./CustomerFooter";
 
 export default function CustomersMain() {
   const { open, setOpen } = useCustomers();
@@ -15,7 +14,6 @@ export default function CustomersMain() {
       <CustomerStats />
       <CustomerFilter />
       <CustomerTable />
-      <CustomerFooter />
     </div>
   );
 }
