@@ -151,7 +151,7 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
                     </TableCell>
                   </TableRow>
                 ) : (
-                  statement.map((entry) => (
+                  statement.map((entry: any) => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">
                         {format(new Date(entry.date), "MMM dd, yyyy")}

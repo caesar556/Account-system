@@ -28,3 +28,6 @@ export const apiSlice = createApi({
     }),
   }),
 });
+
+export const { useGetStatementQuery } = apiSlice;
+
