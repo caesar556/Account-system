@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const customerSummary = await CustomerService.getCustomerSummary(id);
     return NextResponse.json(customerSummary);
   } catch (error: any) {

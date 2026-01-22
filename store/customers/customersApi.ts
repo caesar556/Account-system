@@ -40,7 +40,21 @@ export const customersApi = apiSlice.injectEndpoints({
         { type: "CustomerRecords", id: customerId },
         "Transactions",
         "Treasury",
-        "Statements"
+        "Statements",
+        "Customers"
+      ],
+    }),
+
+    createCustomerRecord: builder.mutation<any, { customerId: string; title: string; totalAmount: number; description?: string; dueDate?: string }>({
+      query: ({ customerId, ...body }) => ({
+        url: `/customers/${customerId}/records`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { customerId }) => [
+        { type: "CustomerRecords", id: customerId },
+        "Statements",
+        "Customers"
       ],
     }),
   }),
@@ -53,4 +67,5 @@ export const {
   useGetCustomerSummaryQuery,
   useGetCustomerRecordsQuery,
   usePayRecordMutation,
+  useCreateCustomerRecordMutation,
 } = customersApi;
