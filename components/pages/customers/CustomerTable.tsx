@@ -197,12 +197,12 @@ export default function CustomerTable() {
                             {balance > 0 ? (
                               <span className="flex items-center gap-1">
                                 <CreditCard className="h-3 w-3" />
-                                مدين
+                                عليه
                               </span>
                             ) : balance < 0 ? (
                               <span className="flex items-center gap-1 text-green-600">
                                 <TrendingUp className="h-3 w-3" />
-                                دائن
+                                له
                               </span>
                             ) : (
                               <span className="flex items-center gap-1">
