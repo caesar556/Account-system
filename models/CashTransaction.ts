@@ -17,12 +17,14 @@ const CashTransactionSchema = new mongoose.Schema(
       type: String,
       enum: ["DEBIT", "CREDIT"],
       required: true,
+      index: true,
     },
 
     amount: {
       type: Number,
       required: true,
       min: 0,
+      index: true,
     },
 
     paymentMethod: {

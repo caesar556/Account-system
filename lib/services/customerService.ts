@@ -129,31 +129,54 @@ export class CustomerService {
   ) {
     const { minBalance = 0, sortBy = "balance", order = "desc" } = options;
 
-    const customers = await Customer.find({ isActive: true }).lean();
+    const pipeline = [
+      { $match: { isActive: true } },
+      {
+        $lookup: {
+          from: "cashtransactions",
+          localField: "_id",
+          foreignField: "customerId",
+          as: "transactions",
+        },
+      },
+      {
+        $addFields: {
+          currentBalance: {
+            $add: [
+              { $ifNull: ["$currentBalance", 0] },
+              {
+                $sum: {
+                  $map: {
+                    input: "$transactions",
+                    as: "tx",
+                    in: {
+                      $cond: [
+                        { $eq: ["$$tx.type", "DEBIT"] },
+                        "$$tx.amount",
+                        { $multiply: ["$$tx.amount", -1] },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      { $match: { currentBalance: { $gte: minBalance } } },
+      {
+        $sort:
+          sortBy === "balance"
+            ? { currentBalance: order === "desc" ? -1 : 1 }
+            : { name: order === "desc" ? -1 : 1 },
+      },
+      {
+        $project: {
+          transactions: 0,
+        },
+      },
+    ];
 
-    const customersWithBalance = await Promise.all(
-      customers.map(async (customer) => {
-        const balance = await this.getCurrentBalance(customer._id.toString());
-        return {
-          ...customer,
-          currentBalance: balance,
-        };
-      }),
-    );
-
-    const filtered = customersWithBalance.filter(
-      (c) => c.currentBalance >= minBalance,
-    );
-
-    return filtered.sort((a, b) => {
-      if (sortBy === "balance") {
-        return order === "desc"
-          ? b.currentBalance - a.currentBalance
-          : a.currentBalance - b.currentBalance;
-      }
-      return order === "desc"
-        ? b.name.localeCompare(a.name)
-        : a.name.localeCompare(b.name);
-    });
+    return await Customer.aggregate(pipeline as any);
   }
 }

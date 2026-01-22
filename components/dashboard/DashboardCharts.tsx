@@ -10,6 +10,7 @@ import {
   PointElement,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
 import { Bar, Pie, Line, Doughnut } from "react-chartjs-2";
 
@@ -25,6 +26,7 @@ ChartJS.register(
   PointElement,
   Tooltip,
   Legend,
+  Filler
 );
 
 

@@ -27,7 +27,7 @@ const CustomerRecordSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["OPEN", "PARTIAL", "PAID", "CANCELLED"],
+      enum: ["OPEN", "PARTIAL", "PAID", "CANCELLED", "PENDING"],
       default: "OPEN",
     },
   },
@@ -37,6 +37,7 @@ const CustomerRecordSchema = new mongoose.Schema(
 CustomerRecordSchema.index({ customerId: 1, status: 1 });
 CustomerRecordSchema.index({ dueDate: 1 });
 CustomerRecordSchema.index({ status: 1 });
+CustomerRecordSchema.index({ customerId: 1, createdAt: -1 });
 
 export default mongoose.models.CustomerRecord ||
   mongoose.model("CustomerRecord", CustomerRecordSchema);
