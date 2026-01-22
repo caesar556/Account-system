@@ -30,21 +30,6 @@ interface TransactionFormFieldsProps {
   exceedsCreditLimit: boolean;
 }
 
-/**
- * CORRECTED UI LABELS:
- * ====================
- * 
- * CREDIT (دائن) = وارد (Money IN) = GREEN
- * - Customer pays
- * - Treasury receives money
- * - Customer debt decreases
- * 
- * DEBIT (مدين) = صادر (Money OUT) = RED
- * - Customer takes goods/services
- * - Treasury pays out
- * - Customer debt increases
- */
-
 export function TransactionFormFields({
   control,
   treasuries,

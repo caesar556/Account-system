@@ -131,7 +131,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700">
           إضافة السجل
         </Button>
       </form>

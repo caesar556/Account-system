@@ -303,7 +303,11 @@ export default function CustomerStatement({
                       >
                         {Math.abs(entry.balance).toLocaleString()}
                         <span className="text-[10px] mr-1 opacity-60">
-                          {entry.balance > 0 ? "مدين" : entry.balance < 0 ? "دائن" : ""}
+                          {entry.balance > 0
+                            ? "مدين"
+                            : entry.balance < 0
+                              ? "دائن"
+                              : ""}
                         </span>
                       </TableCell>
                     </TableRow>

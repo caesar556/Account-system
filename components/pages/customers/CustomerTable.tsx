@@ -68,7 +68,9 @@ export default function CustomerTable() {
     );
   }
 
-  const customerList = Array.isArray(filteredCustomers) ? filteredCustomers : [];
+  const customerList = Array.isArray(filteredCustomers)
+    ? filteredCustomers
+    : [];
 
   return (
     <Card>
@@ -118,7 +120,10 @@ export default function CustomerTable() {
                     : "??";
 
                   return (
-                    <TableRow key={customer._id} className="hover:bg-muted/30 transition-colors">
+                    <TableRow
+                      key={customer._id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
                       <TableCell className="py-4">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10 border border-primary/10">
@@ -127,7 +132,9 @@ export default function CustomerTable() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                            <div className="font-bold text-base">{customer.name}</div>
+                            <div className="font-bold text-base">
+                              {customer.name}
+                            </div>
                             {customer.notes && (
                               <div className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">
                                 {customer.notes}
@@ -188,15 +195,24 @@ export default function CustomerTable() {
                           </div>
                           <div className="flex items-center gap-1.5">
                             {balance > 0 ? (
-                              <Badge variant="outline" className="text-[10px] h-5 bg-red-50 text-red-700 border-red-100 px-1 font-bold">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 bg-red-50 text-red-700 border-red-100 px-1 font-bold"
+                              >
                                 عليه
                               </Badge>
                             ) : balance < 0 ? (
-                              <Badge variant="outline" className="text-[10px] h-5 bg-green-50 text-green-700 border-green-100 px-1 font-bold">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 bg-green-50 text-green-700 border-green-100 px-1 font-bold"
+                              >
                                 له
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-[10px] h-5 bg-slate-50 text-slate-500 border-slate-100 px-1">
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 bg-slate-50 text-slate-500 border-slate-100 px-1"
+                              >
                                 متوازن
                               </Badge>
                             )}
@@ -244,10 +260,10 @@ export default function CustomerTable() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem asChild>
                                 <Link
-                                  href={`/customers/${customer._id}/transactions`}
+                                  href={`/customers/${customer._id}/records`}
                                   className="w-full text-right"
                                 >
-                                  المعاملات
+                                  سجل الإلتزامات
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
