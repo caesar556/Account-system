@@ -35,7 +35,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
       totalAmount: 1,
       paidAmount: 0,
       status: "OPEN",
-      dueDate: "",
+      dueDate: undefined,
     },
   });
 

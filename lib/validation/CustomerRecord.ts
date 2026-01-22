@@ -14,11 +14,13 @@ export const recordSchema = z.object({
 
   paidAmount: z.coerce.number().min(0, "المبلغ المدفوع يجب أن يكون أكبر من أو يساوي صفر"),
 
-  status: z.enum(["OPEN", "PARTIAL", "PAID", "CANCELLED"]),
+  status: z.enum(["OPEN", "PARTIAL", "PAID", "CANCELLED", "PENDING"]),
 
   dueDate: z
     .string()
     .optional()
+    .or(z.literal(""))
+    .transform((val) => (val === "" ? undefined : val))
     .refine((val) => !val || !Number.isNaN(Date.parse(val)), {
       message: "تاريخ الاستحقاق غير صحيح",
     }),
