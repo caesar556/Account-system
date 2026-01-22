@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { StatementService } from "@/lib/services/statementService";
-import { connectDB } from "@/lib/db";
+import dbConnect from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    await dbConnect();
     const { id } = await params;
 
     if (!id) {
