@@ -24,8 +24,8 @@ export class StatementService {
     if (!customer) throw new Error("Customer not found");
 
     const [records, transactions] = await Promise.all([
-      CustomerRecord.find({ customerId }).lean(),
-      CashTransaction.find({ customerId }).lean(),
+      CustomerRecord.find({ customerId }).sort({ createdAt: 1 }).lean(),
+      CashTransaction.find({ customerId }).sort({ createdAt: 1 }).lean(),
     ]);
 
     // 1️⃣ حوّل الفواتير Entries
