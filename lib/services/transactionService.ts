@@ -6,9 +6,6 @@ import mongoose from "mongoose";
 import { CustomerService } from "./customerService";
 
 export class TransactionService {
-  /**
-   * Create a financial transaction with full atomicity
-   */
   static async createTransaction(data: {
     treasuryId: string;
     customerId?: string;
@@ -19,7 +16,6 @@ export class TransactionService {
     referenceType: "CUSTOMER_RECORD" | "MANUAL" | "ADJUSTMENT";
     referenceId?: string;
   }) {
-    // Validation
     if (data.amount <= 0) {
       throw new Error("Amount must be positive");
     }
@@ -28,7 +24,6 @@ export class TransactionService {
     session.startTransaction();
 
     try {
-      // 1. Validate Treasury
       const treasury = await Treasury.findById(data.treasuryId).session(
         session,
       );
@@ -36,7 +31,6 @@ export class TransactionService {
         throw new Error("Treasury not available");
       }
 
-      // 2. Validate Customer (if provided)
       if (data.customerId) {
         const customer = await Customer.findById(data.customerId).session(
           session,
@@ -45,22 +39,21 @@ export class TransactionService {
           throw new Error("Customer not available");
         }
 
-      // 3. Check Credit Limit for CREDIT transactions (Customer owes more)
-      if (data.type === "CREDIT" && customer.creditLimit > 0) {
-        const currentBalance = await CustomerService.getCurrentBalance(
-          data.customerId,
-        );
-        const projectedBalance = currentBalance + data.amount;
-
-        if (projectedBalance > customer.creditLimit) {
-          throw new Error(
-            `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
+        if (data.type === "DEBIT" && customer.creditLimit > 0) {
+          const currentBalance = await CustomerService.getCurrentBalance(
+            data.customerId,
           );
+          const projectedBalance = currentBalance + data.amount;
+
+          if (projectedBalance > customer.creditLimit) {
+            throw new Error(
+              `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
+            );
+          }
         }
       }
 
-      // 4. Check Treasury has sufficient funds for CREDIT (payment out / expense)
-      if (data.type === "CREDIT") {
+      if (data.type === "DEBIT") {
         if (treasury.currentBalance < data.amount) {
           throw new Error(
             `رصيد الخزينة غير كافٍ. المتوفر: ${treasury.currentBalance}`,
@@ -68,13 +61,10 @@ export class TransactionService {
         }
       }
 
-      // 5. Create Transaction
       const [transaction] = await CashTransaction.create([data], { session });
 
-      // 6. Update Treasury Balance
-      // DEBIT (Green) = IN (Income/Payment from customer) = INCREASE Treasury
-      // CREDIT (Red) = OUT (Expense/Debt for customer) = DECREASE Treasury
-      const treasuryChange = data.type === "DEBIT" ? data.amount : -data.amount;
+      const treasuryChange =
+        data.type === "CREDIT" ? data.amount : -data.amount;
 
       await Treasury.findByIdAndUpdate(
         data.treasuryId,
@@ -82,14 +72,16 @@ export class TransactionService {
         { session },
       );
 
-      // 7. Update Customer Balance
-      // DEBIT = Debt decreases (Payment from customer) = -Amount
-      // CREDIT = Debt increases (Customer owes more) = +Amount
       if (data.customerId) {
         await Customer.findByIdAndUpdate(
           data.customerId,
-          { $inc: { currentBalance: data.type === "CREDIT" ? data.amount : -data.amount } },
-          { session }
+          {
+            $inc: {
+              currentBalance:
+                data.type === "DEBIT" ? data.amount : -data.amount,
+            },
+          },
+          { session },
         );
       }
 
@@ -138,7 +130,7 @@ export class TransactionService {
       const transaction = await this.createTransaction({
         treasuryId: data.treasuryId,
         customerId: record.customerId.toString(),
-        type: "DEBIT",
+        type: "CREDIT",
         amount: data.amount,
         paymentMethod: data.paymentMethod,
         description: data.description || `Payment for ${record.title}`,

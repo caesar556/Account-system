@@ -34,14 +34,14 @@ export default async function Home() {
   const allTransactions = await CashTransaction.find();
 
   const totalIn = allTransactions
-    .filter((t) => t.type === "DEBIT")
-    .reduce((acc, curr) => acc + curr.amount, 0);
-
-  const totalOut = allTransactions
     .filter((t) => t.type === "CREDIT")
     .reduce((acc, curr) => acc + curr.amount, 0);
 
-  const balance = totalIn - totalOut;
+  const totalOut = allTransactions
+    .filter((t) => t.type === "DEBIT")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const balance = treasury.currentBalance;
 
   return (
     <main
@@ -186,22 +186,22 @@ export default async function Home() {
                       <td className="px-8 py-5">
                         <Badge
                           variant={
-                            t.type === "DEBIT" ? "outline" : "destructive"
+                            t.type === "CREDIT" ? "outline" : "destructive"
                           }
                           className={`
                             px-3 py-1 font-bold rounded-full
-                            ${t.type === "DEBIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
+                            ${t.type === "CREDIT" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200 shadow-none"}
                           `}
                         >
-                          {t.type === "DEBIT"
+                          {t.type === "CREDIT"
                             ? "مقبوضات (وارد)"
                             : "مدفوعات (صادر)"}
                         </Badge>
                       </td>
                       <td
-                        className={`px-8 py-5 text-lg font-black ${t.type === "DEBIT" ? "text-emerald-600" : "text-rose-600"}`}
+                        className={`px-8 py-5 text-lg font-black ${t.type === "CREDIT" ? "text-emerald-600" : "text-rose-600"}`}
                       >
-                        {t.type === "DEBIT" ? "+" : "-"}
+                        {t.type === "CREDIT" ? "+" : "-"}
                         {t.amount.toLocaleString()}
                         <span className="text-xs font-normal mr-1 opacity-70">
                           EGP

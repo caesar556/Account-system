@@ -54,6 +54,12 @@ export default function TreasuryMain() {
     totalItems,
   } = useTransactions();
 
+  const referenceType = {
+    CUSTOMER_RECORD: "سجل عميل",
+    MANUAL: "عملية يدوية",
+    ADJUSTMENT: "تسوية رصيد",
+  };
+
   if (isLoading) {
     return (
       <p className="text-center text-muted-foreground mt-10">
@@ -160,25 +166,25 @@ export default function TreasuryMain() {
                           <Badge
                             variant="outline"
                             className={
-                              tx.type === "DEBIT"
+                              tx.type === "CREDIT"
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : "bg-rose-50 text-rose-700 border-rose-200"
                             }
                           >
                             <ArrowUpRight className="h-3.5 w-3.5 ml-1" />
-                            {tx.type === "DEBIT" ? "مقبوضات" : "مدفوعات"}
+                            {tx.type === "CREDIT" ? "مقبوضات" : "مدفوعات"}
                           </Badge>
                         </TableCell>
 
                         {/* Amount */}
                         <TableCell
                           className={`font-bold ${
-                            tx.type === "DEBIT"
+                            tx.type === "CREDIT"
                               ? "text-emerald-600"
                               : "text-rose-600"
                           }`}
                         >
-                          {tx.type === "DEBIT" ? "+" : "-"}
+                          {tx.type === "CREDIT" ? "+" : "-"}
                           {tx.amount.toLocaleString("ar-EG")} ج.م
                         </TableCell>
 
@@ -199,7 +205,13 @@ export default function TreasuryMain() {
                           </div>
                         </TableCell>
 
-                        <TableCell> {tx.reason} </TableCell>
+                        <TableCell>
+                          {
+                            referenceType[
+                              tx.referenceType as keyof typeof referenceType
+                            ]
+                          }
+                        </TableCell>
 
                         {/* Date */}
                         <TableCell className="text-left text-xs text-muted-foreground font-mono">

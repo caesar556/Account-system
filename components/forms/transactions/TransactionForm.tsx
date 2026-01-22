@@ -30,6 +30,21 @@ interface TransactionFormFieldsProps {
   exceedsCreditLimit: boolean;
 }
 
+/**
+ * CORRECTED UI LABELS:
+ * ====================
+ * 
+ * CREDIT (دائن) = وارد (Money IN) = GREEN
+ * - Customer pays
+ * - Treasury receives money
+ * - Customer debt decreases
+ * 
+ * DEBIT (مدين) = صادر (Money OUT) = RED
+ * - Customer takes goods/services
+ * - Treasury pays out
+ * - Customer debt increases
+ */
+
 export function TransactionFormFields({
   control,
   treasuries,
@@ -55,10 +70,10 @@ export function TransactionFormFields({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="DEBIT" className="text-emerald-600">
-                   وارد (مقبوضات)
+                  <SelectItem value="CREDIT" className="text-emerald-600">
+                    وارد (مقبوضات)
                   </SelectItem>
-                  <SelectItem value="CREDIT" className="text-rose-600">
+                  <SelectItem value="DEBIT" className="text-rose-600">
                     صادر (مدفوعات)
                   </SelectItem>
                 </SelectContent>
@@ -216,11 +231,13 @@ export function TransactionFormFields({
                 <div>
                   <p className="text-sm text-gray-500">الاستخدام</p>
                   <p className="font-semibold">
-                    {Math.round(
-                      (selectedCustomer.currentBalance /
-                        selectedCustomer.creditLimit) *
-                        100,
-                    )}
+                    {selectedCustomer.creditLimit > 0
+                      ? Math.round(
+                          (selectedCustomer.currentBalance /
+                            selectedCustomer.creditLimit) *
+                            100,
+                        )
+                      : 0}
                     %
                   </p>
                 </div>

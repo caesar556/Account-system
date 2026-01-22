@@ -47,10 +47,10 @@ export async function GET(req: Request) {
               $group: {
                 _id: null,
                 totalIn: {
-                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
                 },
                 totalOut: {
-                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
                 },
                 transactions: { $sum: 1 },
               },
@@ -79,10 +79,10 @@ export async function GET(req: Request) {
               $group: {
                 _id: "$referenceType",
                 in: {
-                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
                 },
                 out: {
-                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
                 },
                 count: { $sum: 1 },
               },
@@ -101,10 +101,10 @@ export async function GET(req: Request) {
               $group: {
                 _id: "$paymentMethod",
                 in: {
-                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
                 },
                 out: {
-                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
                 },
                 count: { $sum: 1 },
               },
@@ -127,10 +127,10 @@ export async function GET(req: Request) {
                   },
                 },
                 in: {
-                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
                 },
                 out: {
-                  $sum: { $cond: [{ $eq: ["$type", "CREDIT"] }, "$amount", 0] },
+                  $sum: { $cond: [{ $eq: ["$type", "DEBIT"] }, "$amount", 0] },
                 },
               },
             },
