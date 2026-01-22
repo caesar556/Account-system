@@ -10,9 +10,9 @@ export const recordSchema = z.object({
 
   description: z.string().optional(),
 
-  totalAmount: z.number().min(1, "المبلغ يجب أن يكون أكبر من صفر"),
+  totalAmount: z.coerce.number().min(1, "المبلغ يجب أن يكون أكبر من صفر"),
 
-  paidAmount: z.number().min(0, "المبلغ المدفوع يجب أن يكون أكبر من أو يساوي صفر"),
+  paidAmount: z.coerce.number().min(0, "المبلغ المدفوع يجب أن يكون أكبر من أو يساوي صفر"),
 
   status: z.enum(["OPEN", "PARTIAL", "PAID", "CANCELLED"]),
 
