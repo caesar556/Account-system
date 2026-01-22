@@ -27,7 +27,7 @@ const CustomerRecordSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["OPEN", "PAID"],
+      enum: ["OPEN", "PARTIAL", "PAID", "CANCELLED"],
       default: "OPEN",
     },
   },

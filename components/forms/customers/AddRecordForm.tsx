@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,17 +13,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { usePayRecordMutation } from "@/store/customers/customersApi"; // We'll need a createRecord mutation
 import { toast } from "sonner";
 
-const recordSchema = z.object({
-  title: z.string().min(3, "العنوان يجب أن يكون 3 أحرف على الأقل"),
-  totalAmount: z.coerce.number().min(1, "المبلغ يجب أن يكون أكبر من صفر"),
-  description: z.string().optional(),
-  dueDate: z.string().optional(),
-});
-
-type RecordFormValues = z.infer<typeof recordSchema>;
+import {
+  RecordFormValues,
+  recordSchema,
+} from "@/lib/validation/CustomerRecord";
 
 interface AddRecordFormProps {
   customerId: string;
@@ -35,9 +29,12 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
   const form = useForm<RecordFormValues>({
     resolver: zodResolver(recordSchema),
     defaultValues: {
+      customerId,
       title: "",
-      totalAmount: 0,
       description: "",
+      totalAmount: 1,
+      paidAmount: 0,
+      status: "OPEN",
       dueDate: "",
     },
   });
@@ -75,7 +72,8 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="totalAmount"
@@ -89,6 +87,21 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="paidAmount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>المبلغ المدفوع</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="dueDate"
@@ -103,6 +116,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="description"
@@ -116,6 +130,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
             </FormItem>
           )}
         />
+
         <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
           إضافة السجل
         </Button>
