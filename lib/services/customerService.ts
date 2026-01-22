@@ -4,15 +4,10 @@ import CustomerRecord from "@/models/CustomerRecord";
 import { Types } from "mongoose";
 
 export class CustomerService {
-  /**
-   * Get customer's current balance (calculated from transactions)
-   * Positive = Customer owes money (DEBIT > CREDIT)
-   * Negative = We owe customer money (CREDIT > DEBIT)
-   */
   static async getCurrentBalance(customerId: string): Promise<number> {
     const customer = await Customer.findById(customerId);
     if (!customer) return 0;
-    
+
     const openingBalance = (customer as any).currentBalance || 0;
 
     const result = await CashTransaction.aggregate([
@@ -34,11 +29,9 @@ export class CustomerService {
     ]);
 
     const txBalance = result[0]?.txBalance || 0;
-    
-    // Total balance = Opening Balance + (Debits - Credits)
+
     return openingBalance + txBalance;
   }
-
 
   static async getCustomerSummary(customerId: string) {
     const customer = await Customer.findById(customerId);
@@ -114,7 +107,7 @@ export class CustomerService {
   static async checkCreditLimit(
     customerId: string,
     additionalAmount: number,
-    type: "DEBIT" | "CREDIT" = "DEBIT"
+    type: "DEBIT" | "CREDIT" = "DEBIT",
   ): Promise<boolean> {
     const customer = await Customer.findById(customerId);
     if (!customer) throw new Error("Customer not found");
@@ -127,9 +120,6 @@ export class CustomerService {
     return projectedBalance <= customer.creditLimit;
   }
 
-  /**
-   * Get customers with outstanding balances
-   */
   static async getCustomersWithDebt(
     options: {
       minBalance?: number;

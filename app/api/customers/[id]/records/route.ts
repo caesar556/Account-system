@@ -8,7 +8,8 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const records = await CustomerRecord.find({ customerId: params.id })
+    const { id } = params;
+    const records = await CustomerRecord.find({ customerId: id })
       .sort({ createdAt: -1 })
       .lean();
     return NextResponse.json(records);
@@ -23,10 +24,11 @@ export async function POST(
 ) {
   try {
     await dbConnect();
+    const { id } = params;
     const body = await request.json();
     const record = await CustomerRecord.create({
       ...body,
-      customerId: params.id,
+      customerId: id,
     });
     return NextResponse.json(record, { status: 201 });
   } catch (error: any) {
