@@ -30,6 +30,11 @@ export const customersApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "CustomerRecords", id }],
     }),
 
+    getCustomersGlobalSummary: builder.query<{ totalCustomers: number; totalBalance: number }, void>({
+      query: () => "/customers/summary",
+      providesTags: ["Customers"],
+    }),
+
     payRecord: builder.mutation<any, { customerId: string; recordId: string; amount: number; treasuryId: string; paymentMethod: string; description?: string }>({
       query: ({ customerId, ...body }) => ({
         url: `/customers/${customerId}/pay`,
@@ -65,6 +70,7 @@ export const {
   useCreateCustomerMutation,
   useGetCustomerStatementQuery,
   useGetCustomerSummaryQuery,
+  useGetCustomersGlobalSummaryQuery,
   useGetCustomerRecordsQuery,
   usePayRecordMutation,
   useCreateCustomerRecordMutation,

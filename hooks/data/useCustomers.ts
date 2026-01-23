@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useGetCustomersQuery } from "@/store/customers/customersApi";
+import { useGetCustomersQuery, useGetCustomersGlobalSummaryQuery } from "@/store/customers/customersApi";
 
 export function useCustomers() {
   const [search, setSearch] = useState("");
@@ -13,10 +13,14 @@ export function useCustomers() {
 
   const {
     data: customers = [],
-    isLoading,
+    isLoading: isCustomersLoading,
     error,
     refetch,
   } = useGetCustomersQuery();
+
+  const { data: globalSummary, isLoading: isSummaryLoading } = useGetCustomersGlobalSummaryQuery();
+
+  const isLoading = isCustomersLoading || isSummaryLoading;
 
   const filteredCustomers = useMemo(() => {
     const list = Array.isArray(customers) ? customers : [];
@@ -71,6 +75,8 @@ export function useCustomers() {
 
   return {
     customers: filteredCustomers,
+    totalCustomers: globalSummary?.totalCustomers || 0,
+    totalBalance: globalSummary?.totalBalance || 0,
     isLoading,
     error,
     search,
