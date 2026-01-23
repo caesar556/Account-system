@@ -1,105 +1,45 @@
-import { ClientSession, Types } from "mongoose";
-import Customer from "@/models/Customer";
 import { CashTransaction } from "@/models/CashTransaction";
+import Customer from "@/models/Customer";
 import CustomerRecord from "@/models/CustomerRecord";
+import { Types } from "mongoose";
 
 export class CustomerService {
-  /**
-   * حساب الرصيد بالكامل (Ledger + Unpaid Records)
-   * ledger: transactions (DEBIT - CREDIT)
-   * unpaidRecords: OPEN / PARTIAL records
-   * total: ledger + unpaidRecords
-   */
-  static async calculateBalance(
-    customerId: string,
-    session?: ClientSession,
-  ): Promise<{ ledger: number; unpaidRecords: number; total: number }> {
-    const id = new Types.ObjectId(customerId);
+  static async getCurrentBalance(customerId: string): Promise<number> {
+    const customer = await Customer.findById(customerId);
+    if (!customer) return 0;
 
-    const tx = await CashTransaction.aggregate(
-      [
-        { $match: { customerId: id } },
-        {
-          $group: {
-            _id: null,
-            ledger: {
-              $sum: {
-                $cond: [
-                  { $eq: ["$type", "DEBIT"] },
-                  "$amount",
-                  { $multiply: ["$amount", -1] },
-                ],
-              },
+    const openingBalance = (customer as any).currentBalance || 0;
+
+    const result = await CashTransaction.aggregate([
+      { $match: { customerId: new Types.ObjectId(customerId) } },
+      {
+        $group: {
+          _id: null,
+          txBalance: {
+            $sum: {
+              $cond: [
+                { $eq: ["$type", "DEBIT"] },
+                "$amount",
+                { $multiply: ["$amount", -1] },
+              ],
             },
           },
         },
-      ],
-      session ? { session } : undefined,
-    );
+      },
+    ]);
 
-    const ledger = tx[0]?.ledger || 0;
+    const txBalance = result[0]?.txBalance || 0;
 
-    const rec = await CustomerRecord.aggregate(
-      [
-        {
-          $match: {
-            customerId: id,
-            status: { $in: ["OPEN", "PARTIAL"] },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            unpaidRecords: {
-              $sum: { $subtract: ["$totalAmount", "$paidAmount"] },
-            },
-          },
-        },
-      ],
-      session ? { session } : undefined,
-    );
-
-    const unpaidRecords = rec[0]?.unpaidRecords || 0;
-
-    return {
-      ledger,
-      unpaidRecords,
-      total: ledger + unpaidRecords,
-    };
+    return openingBalance + txBalance;
   }
 
-  /**
-   * check if customer can take additionalAmount (DEBIT)
-   * based on credit limit and current balance
-   */
-  static async checkCreditLimit(
-    customerId: string,
-    additionalAmount: number,
-    session?: ClientSession,
-  ): Promise<boolean> {
-    const customer = await Customer.findById(customerId).session(
-      session || null,
-    );
-    if (!customer || customer.creditLimit <= 0) return true;
-
-    const balance = await this.calculateBalance(customerId, session);
-
-    return balance.total + additionalAmount <= customer.creditLimit;
-  }
-
-  /**
-   * Customer summary
-   * - balance
-   * - transactions totals
-   * - customer info
-   */
   static async getCustomerSummary(customerId: string) {
-    const customer = await Customer.findById(customerId).lean();
+    const customer = await Customer.findById(customerId);
     if (!customer) throw new Error("Customer not found");
 
-    const balance = await this.calculateBalance(customerId);
+    const currentBalance = await this.getCurrentBalance(customerId);
 
-    const txStats = await CashTransaction.aggregate([
+    const transactions = await CashTransaction.aggregate([
       { $match: { customerId: new Types.ObjectId(customerId) } },
       {
         $group: {
@@ -110,35 +50,76 @@ export class CustomerService {
       },
     ]);
 
+    const totalDebit = transactions.find((t) => t._id === "DEBIT")?.total || 0;
+    const totalCredit =
+      transactions.find((t) => t._id === "CREDIT")?.total || 0;
+
+    const records = await CustomerRecord.aggregate([
+      { $match: { customerId: new Types.ObjectId(customerId) } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+          totalAmount: { $sum: "$totalAmount" },
+          paidAmount: { $sum: "$paidAmount" },
+        },
+      },
+    ]);
+
+    const unpaidRecords = records.filter(
+      (r) => r._id === "PENDING" || r._id === "PARTIAL",
+    );
+    const totalUnpaid = unpaidRecords.reduce(
+      (sum, r) => sum + (r.totalAmount - r.paidAmount),
+      0,
+    );
+
     return {
       customer: {
         _id: customer._id,
         name: customer.name,
         phone: customer.phone,
-        category: customer.category,
         creditLimit: customer.creditLimit,
         isActive: customer.isActive,
       },
       balance: {
-        ledger: balance.ledger,
-        unpaidRecords: balance.unpaidRecords,
-        current: balance.total,
+        current: currentBalance,
         creditLimit: customer.creditLimit,
-        availableCredit: Math.max(0, customer.creditLimit - balance.total),
+        availableCredit: Math.max(0, customer.creditLimit - currentBalance),
+        utilizationPercent:
+          customer.creditLimit > 0
+            ? (currentBalance / customer.creditLimit) * 100
+            : 0,
       },
       transactions: {
-        debitTotal: txStats.find((t) => t._id === "DEBIT")?.total || 0,
-        creditTotal: txStats.find((t) => t._id === "CREDIT")?.total || 0,
-        debitCount: txStats.find((t) => t._id === "DEBIT")?.count || 0,
-        creditCount: txStats.find((t) => t._id === "CREDIT")?.count || 0,
+        totalDebit,
+        totalCredit,
+        debitCount: transactions.find((t) => t._id === "DEBIT")?.count || 0,
+        creditCount: transactions.find((t) => t._id === "CREDIT")?.count || 0,
+      },
+      records: {
+        totalUnpaid,
+        unpaidCount: unpaidRecords.reduce((sum, r) => sum + r.count, 0),
       },
     };
   }
 
-  /**
-   * Get customers with debt (ledger + unpaid records)
-   * + sorting + filtering
-   */
+  static async checkCreditLimit(
+    customerId: string,
+    additionalAmount: number,
+    type: "DEBIT" | "CREDIT" = "DEBIT",
+  ): Promise<boolean> {
+    const customer = await Customer.findById(customerId);
+    if (!customer) throw new Error("Customer not found");
+
+    if (customer.creditLimit <= 0 || type === "CREDIT") return true;
+
+    const currentBalance = await this.getCurrentBalance(customerId);
+    const projectedBalance = currentBalance + additionalAmount;
+
+    return projectedBalance <= customer.creditLimit;
+  }
+
   static async getCustomersWithDebt(
     options: {
       minBalance?: number;
@@ -148,89 +129,31 @@ export class CustomerService {
   ) {
     const { minBalance = 0, sortBy = "balance", order = "desc" } = options;
 
-    const pipeline = [
-      { $match: { isActive: true } },
+    const customers = await Customer.find({ isActive: true }).lean();
 
-      // Join transactions
-      {
-        $lookup: {
-          from: "cashtransactions",
-          localField: "_id",
-          foreignField: "customerId",
-          as: "transactions",
-        },
-      },
+    const customersWithBalance = await Promise.all(
+      customers.map(async (customer) => {
+        const balance = await this.getCurrentBalance(customer._id.toString());
+        return {
+          ...customer,
+          currentBalance: balance,
+        };
+      }),
+    );
 
-      // Join records
-      {
-        $lookup: {
-          from: "customerrecords",
-          localField: "_id",
-          foreignField: "customerId",
-          as: "records",
-        },
-      },
+    const filtered = customersWithBalance.filter(
+      (c) => c.currentBalance >= minBalance,
+    );
 
-      // Calculate ledger + unpaidRecords
-      {
-        $addFields: {
-          ledger: {
-            $sum: {
-              $map: {
-                input: "$transactions",
-                as: "tx",
-                in: {
-                  $cond: [
-                    { $eq: ["$$tx.type", "DEBIT"] },
-                    "$$tx.amount",
-                    { $multiply: ["$$tx.amount", -1] },
-                  ],
-                },
-              },
-            },
-          },
-          unpaidRecords: {
-            $sum: {
-              $map: {
-                input: {
-                  $filter: {
-                    input: "$records",
-                    as: "r",
-                    cond: { $in: ["$$r.status", ["OPEN", "PARTIAL"]] },
-                  },
-                },
-                as: "r",
-                in: { $subtract: ["$$r.totalAmount", "$$r.paidAmount"] },
-              },
-            },
-          },
-        },
-      },
-
-      // Total balance
-      {
-        $addFields: {
-          currentBalance: { $add: ["$ledger", "$unpaidRecords"] },
-        },
-      },
-
-      { $match: { currentBalance: { $gte: minBalance } } },
-
-      {
-        $sort:
-          sortBy === "balance"
-            ? { currentBalance: order === "desc" ? -1 : 1 }
-            : { name: order === "desc" ? -1 : 1 },
-      },
-
-      {
-        $project: {
-          transactions: 0,
-          records: 0,
-        },
-      },
-    ];
-
-    return await Customer.aggregate(pipeline as any);
+    return filtered.sort((a, b) => {
+      if (sortBy === "balance") {
+        return order === "desc"
+          ? b.currentBalance - a.currentBalance
+          : a.currentBalance - b.currentBalance;
+      }
+      return order === "desc"
+        ? b.name.localeCompare(a.name)
+        : a.name.localeCompare(b.name);
+    });
   }
 }

@@ -30,12 +30,17 @@ export const customersApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "CustomerRecords", id }],
     }),
 
-    getCustomersGlobalSummary: builder.query<{ totalCustomers: number; totalBalance: number }, void>({
-      query: () => "/customers/summary",
-      providesTags: ["Customers"],
-    }),
-
-    payRecord: builder.mutation<any, { customerId: string; recordId: string; amount: number; treasuryId: string; paymentMethod: string; description?: string }>({
+    payRecord: builder.mutation<
+      any,
+      {
+        customerId: string;
+        recordId: string;
+        amount: number;
+        treasuryId: string;
+        paymentMethod: string;
+        description?: string;
+      }
+    >({
       query: ({ customerId, ...body }) => ({
         url: `/customers/${customerId}/pay`,
         method: "POST",
@@ -46,11 +51,20 @@ export const customersApi = apiSlice.injectEndpoints({
         "Transactions",
         "Treasury",
         "Statements",
-        "Customers"
+        "Customers",
       ],
     }),
 
-    createCustomerRecord: builder.mutation<any, { customerId: string; title: string; totalAmount: number; description?: string; dueDate?: string }>({
+    createCustomerRecord: builder.mutation<
+      any,
+      {
+        customerId: string;
+        title: string;
+        totalAmount: number;
+        description?: string;
+        dueDate?: string;
+      }
+    >({
       query: ({ customerId, ...body }) => ({
         url: `/customers/${customerId}/records`,
         method: "POST",
@@ -59,7 +73,7 @@ export const customersApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { customerId }) => [
         { type: "CustomerRecords", id: customerId },
         "Statements",
-        "Customers"
+        "Customers",
       ],
     }),
   }),
@@ -70,7 +84,6 @@ export const {
   useCreateCustomerMutation,
   useGetCustomerStatementQuery,
   useGetCustomerSummaryQuery,
-  useGetCustomersGlobalSummaryQuery,
   useGetCustomerRecordsQuery,
   usePayRecordMutation,
   useCreateCustomerRecordMutation,

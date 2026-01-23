@@ -5,25 +5,25 @@ import { CustomerService } from "@/lib/services/customerService";
 
 export async function GET() {
   try {
-    const customers = await Customer.find().lean();
+    await dbConnect();
+    const customers = await Customer.find().sort({ createdAt: -1 }).lean();
 
-    const data = await Promise.all(
-      customers.map(async (c: any) => {
-        const balance = await CustomerService.calculateBalance(
-          c._id.toString(),
+    // Enrich customers with current balance
+    const enrichedCustomers = await Promise.all(
+      customers.map(async (customer: any) => {
+        const balance = await CustomerService.getCurrentBalance(
+          customer._id.toString(),
         );
         return {
-          ...c,
-          balance: balance.total,
-          ledger: balance.ledger,
-          unpaidRecords: balance.unpaidRecords,
+          ...customer,
+          currentBalance: balance,
         };
       }),
     );
 
-    return NextResponse.json(data);
+    return NextResponse.json(enrichedCustomers);
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 400 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
