@@ -27,6 +27,11 @@ const CustomerSchema = new mongoose.Schema(
       default: "regular",
     },
 
+    openingBalance: {
+      type: Number,
+      default: 0,
+    },
+
     creditLimit: {
       type: Number,
       default: 0,

@@ -1,5 +1,4 @@
 import { CashTransaction } from "@/models/CashTransaction";
-import Customer from "@/models/Customer";
 import CustomerRecord from "@/models/CustomerRecord";
 import { Treasury } from "@/models/Treasury";
 import mongoose from "mongoose";
@@ -31,34 +30,20 @@ export class TransactionService {
         throw new Error("Treasury not available");
       }
 
-      if (data.customerId) {
-        const customer = await Customer.findById(data.customerId).session(
-          session,
+      if (data.customerId && data.type === "DEBIT") {
+        const allowed = await CustomerService.checkCreditLimit(
+          data.customerId,
+          data.amount,
         );
-        if (!customer || !customer.isActive) {
-          throw new Error("Customer not available");
-        }
-
-        if (data.type === "DEBIT" && customer.creditLimit > 0) {
-          const currentBalance = await CustomerService.getCurrentBalance(
-            data.customerId,
-          );
-          const projectedBalance = currentBalance + data.amount;
-
-          if (projectedBalance > customer.creditLimit) {
-            throw new Error(
-              `Exceeds credit limit. Current: ${currentBalance}, Limit: ${customer.creditLimit}`,
-            );
-          }
+        if (!allowed) {
+          throw new Error("Exceeds credit limit");
         }
       }
 
-      if (data.type === "DEBIT") {
-        if (treasury.currentBalance < data.amount) {
-          throw new Error(
-            `رصيد الخزينة غير كافٍ. المتوفر: ${treasury.currentBalance}`,
-          );
-        }
+      if (data.type === "DEBIT" && treasury.currentBalance < data.amount) {
+        throw new Error(
+          `رصيد الخزينة غير كافٍ. المتوفر: ${treasury.currentBalance}`,
+        );
       }
 
       const [transaction] = await CashTransaction.create([data], { session });
@@ -71,19 +56,6 @@ export class TransactionService {
         { $inc: { currentBalance: treasuryChange } },
         { session },
       );
-
-      if (data.customerId) {
-        await Customer.findByIdAndUpdate(
-          data.customerId,
-          {
-            $inc: {
-              currentBalance:
-                data.type === "DEBIT" ? data.amount : -data.amount,
-            },
-          },
-          { session },
-        );
-      }
 
       await session.commitTransaction();
       return transaction;
