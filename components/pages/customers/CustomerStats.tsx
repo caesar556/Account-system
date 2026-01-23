@@ -12,7 +12,16 @@ import { useCustomers } from "@/hooks/data/useCustomers";
 import { Progress } from "@/components/ui/progress";
 
 export default function CustomerStats() {
-  const { stats } = useCustomers();
+  const { stats, isLoading } = useCustomers();
+
+  if (isLoading || !stats) {
+    return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 animate-pulse">
+      {[...Array(5)].map((_, i) => (
+        <Card key={i} className="h-32 bg-muted/20" />
+      ))}
+    </div>;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <Card className="bg-gradient-to-br from-background to-muted/50">

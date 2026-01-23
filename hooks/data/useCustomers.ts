@@ -73,9 +73,21 @@ export function useCustomers() {
     order,
   ]);
 
+  const stats = useMemo(() => {
+    const list = Array.isArray(customers) ? customers : [];
+    return {
+      totalCustomers: globalSummary?.totalCustomers || list.length,
+      activeCustomers: list.filter((c: any) => c.isActive).length,
+      totalDebt: list.filter((c: any) => c.balance > 0).reduce((acc: number, c: any) => acc + c.balance, 0),
+      totalCredit: Math.abs(list.filter((c: any) => c.balance < 0).reduce((acc: number, c: any) => acc + c.balance, 0)),
+      vipCustomers: list.filter((c: any) => c.category === "VIP").length,
+    };
+  }, [customers, globalSummary]);
+
   return {
     customers: filteredCustomers,
-    totalCustomers: globalSummary?.totalCustomers || 0,
+    stats,
+    totalCustomers: stats.totalCustomers,
     totalBalance: globalSummary?.totalBalance || 0,
     isLoading,
     error,
