@@ -8,7 +8,7 @@ export class CustomerService {
     const customer = await Customer.findById(customerId);
     if (!customer) return 0;
 
-    const openingBalance = (customer as any).currentBalance || 0;
+    const openingBalance = (customer as any).openingBalance || 0;
 
     const result = await CashTransaction.aggregate([
       { $match: { customerId: new Types.ObjectId(customerId) } },
