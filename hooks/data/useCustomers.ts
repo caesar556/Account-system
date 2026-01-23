@@ -1,18 +1,27 @@
 "use client";
-import { useGetCustomersQuery } from "@/store/customers/customersApi";
+
 import { useMemo, useState } from "react";
+import { useGetCustomersQuery } from "@/store/customers/customersApi";
 
 export function useCustomers() {
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [balanceFilter, setBalanceFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
 
-  const { data: customers = [], isLoading, error, refetch } = useGetCustomersQuery();
+  const {
+    data: customers = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGetCustomersQuery();
 
   const filteredCustomers = useMemo(() => {
-    return (Array.isArray(customers) ? customers : []).filter((c: any) => {
+    const list = Array.isArray(customers) ? customers : [];
+
+    const filtered = list.filter((c: any) => {
       const matchesSearch =
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         (c.phone && c.phone.includes(search)) ||
@@ -26,7 +35,8 @@ export function useCustomers() {
       const matchesCategory =
         categoryFilter === "all" || c.category === categoryFilter;
 
-      const balance = c.currentBalance || 0;
+      const balance = c.balance || 0;
+
       const matchesBalance =
         balanceFilter === "all" ||
         (balanceFilter === "debt" && balance > 0) ||
@@ -37,50 +47,44 @@ export function useCustomers() {
         matchesSearch && matchesStatus && matchesCategory && matchesBalance
       );
     });
-  }, [customers, search, statusFilter, categoryFilter, balanceFilter]);
 
-  const stats = useMemo(() => {
-    const customerList = Array.isArray(customers) ? customers : [];
-    const totalCustomers = customerList.length;
-    const activeCustomers = customerList.filter((c: any) => c.isActive).length;
-    const totalDebt = customerList.reduce(
-      (sum: number, c: any) =>
-        sum + (c.currentBalance > 0 ? Number(c.currentBalance) : 0),
-      0,
-    );
-    const totalCredit = customerList.reduce(
-      (sum: number, c: any) =>
-        sum + (c.currentBalance < 0 ? Math.abs(Number(c.currentBalance)) : 0),
-      0,
-    );
-    const vipCustomers = customerList.filter(
-      (c: any) => c.category === "vip",
-    ).length;
+    return filtered.sort((a: any, b: any) => {
+      const dir = order === "asc" ? 1 : -1;
 
-    return {
-      totalCustomers,
-      activeCustomers,
-      totalDebt,
-      totalCredit,
-      vipCustomers,
-    };
-  }, [customers]);
+      if (sortBy === "name") {
+        return a.name.localeCompare(b.name) * dir;
+      }
+      if (sortBy === "balance") {
+        return (a.balance - b.balance) * dir;
+      }
+      return 0;
+    });
+  }, [
+    customers,
+    search,
+    statusFilter,
+    categoryFilter,
+    balanceFilter,
+    sortBy,
+    order,
+  ]);
 
   return {
     customers: filteredCustomers,
-    stats,
     isLoading,
     error,
     search,
     setSearch,
-    setOpen,
-    open,
     statusFilter,
     setStatusFilter,
     categoryFilter,
     setCategoryFilter,
     balanceFilter,
     setBalanceFilter,
+    sortBy,
+    setSortBy,
+    order,
+    setOrder,
     refetch,
   };
 }
