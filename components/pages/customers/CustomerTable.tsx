@@ -108,7 +108,7 @@ export default function CustomerTable() {
             <TableBody>
               {customerList.length > 0 ? (
                 customerList.map((customer: any) => {
-                  const balance = customer.openingBalance || 0;
+                  const balance = customer.currentBalance || 0;
                   const initials = customer.name
                     ? customer.name
                         .split(" ")
