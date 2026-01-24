@@ -14,6 +14,8 @@ export const customerSchema = z.object({
     .min(0, "الحد الائتماني لا يمكن أن يكون أقل من صفر")
     .default(0),
   status: z.enum(["paid", "unpaid"]).default("unpaid"),
+  openingBalance: z.coerce.number().default(0),
+
   category: z.enum(["regular", "vip", "wholesale"]).default("regular"),
   notes: z.string().optional(),
 });

@@ -81,11 +81,15 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
               <FormItem>
                 <FormLabel>المبلغ الإجمالي</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
+                  <Input
+                    type="number"
+                    {...field}
                     value={field.value as any}
-                    onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -100,11 +104,15 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
               <FormItem>
                 <FormLabel>المبلغ المدفوع</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
+                  <Input
+                    type="number"
+                    {...field}
                     value={field.value as any}
-                    onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                   />
                 </FormControl>
                 <FormMessage />

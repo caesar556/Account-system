@@ -120,40 +120,42 @@ export class CustomerService {
     return projectedBalance <= customer.creditLimit;
   }
 
-  static async getCustomersWithDebt(
-    options: {
-      minBalance?: number;
-      sortBy?: "balance" | "name";
-      order?: "asc" | "desc";
-    } = {},
-  ) {
-    const { minBalance = 0, sortBy = "balance", order = "desc" } = options;
+  static async getAllCustomersWithBalances() {
+    const customers = await Customer.find({}).lean();
 
-    const customers = await Customer.find({ isActive: true }).lean();
+    const balances = await CashTransaction.aggregate([
+      {
+        $match: {
+          deletedAt: { $exists: false },
+        },
+      },
+      {
+        $group: {
+          _id: "$customerId",
+          txBalance: {
+            $sum: {
+              $cond: [
+                { $eq: ["$type", "DEBIT"] },
+                "$amount",
+                { $multiply: ["$amount", -1] },
+              ],
+            },
+          },
+        },
+      },
+    ]);
 
-    const customersWithBalance = await Promise.all(
-      customers.map(async (customer) => {
-        const balance = await this.getCurrentBalance(customer._id.toString());
-        return {
-          ...customer,
-          currentBalance: balance,
-        };
-      }),
+    const balanceMap = new Map(
+      balances.map((b) => [b._id.toString(), b.txBalance]),
     );
 
-    const filtered = customersWithBalance.filter(
-      (c) => c.currentBalance >= minBalance,
-    );
+    return customers.map((customer) => {
+      const txBalance = balanceMap.get(customer._id.toString()) || 0;
 
-    return filtered.sort((a, b) => {
-      if (sortBy === "balance") {
-        return order === "desc"
-          ? b.currentBalance - a.currentBalance
-          : a.currentBalance - b.currentBalance;
-      }
-      return order === "desc"
-        ? b.name.localeCompare(a.name)
-        : a.name.localeCompare(b.name);
+      return {
+        ...customer,
+        currentBalance: (customer.openingBalance || 0) + txBalance,
+      };
     });
   }
 }

@@ -6,22 +6,9 @@ import { CustomerService } from "@/lib/services/customerService";
 export async function GET() {
   try {
     await dbConnect();
-    const customers = await Customer.find().sort({ createdAt: -1 }).lean();
+    const customers = await CustomerService.getAllCustomersWithBalances();
 
-    // Enrich customers with current balance
-    const enrichedCustomers = await Promise.all(
-      customers.map(async (customer: any) => {
-        const balance = await CustomerService.getCurrentBalance(
-          customer._id.toString(),
-        );
-        return {
-          ...customer,
-          currentBalance: balance,
-        };
-      }),
-    );
-
-    return NextResponse.json(enrichedCustomers);
+    return NextResponse.json(customers);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -32,7 +19,6 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
 
-    // Map status from form (unpaid/paid) if necessary or handle in model
     // The form sends 'status', but the model uses 'isActive' and we calculate balance.
     // Let's ensure the body is compatible.
     const customerData = {

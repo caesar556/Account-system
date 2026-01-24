@@ -40,6 +40,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       email: "",
       address: "",
       creditLimit: 0,
+      openingBalance: 0,
       status: "unpaid",
       category: "regular",
       notes: "",
@@ -135,6 +136,19 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
                 </FormLabel>
                 <FormControl>
                   <Input type="number" className="h-10" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="openingBalance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>رصيد افتتاحي</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
