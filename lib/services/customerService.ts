@@ -126,6 +126,7 @@ export class CustomerService {
     const balances = await CashTransaction.aggregate([
       {
         $match: {
+          customerId: { $exists: true, $ne: null },
           deletedAt: { $exists: false },
         },
       },

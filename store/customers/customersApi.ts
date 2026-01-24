@@ -7,12 +7,44 @@ export const customersApi = apiSlice.injectEndpoints({
       providesTags: ["Customers"],
     }),
 
+    getCustomer: builder.query<any, string>({
+      query: (customerId) => `/customers/${customerId}`,
+      providesTags: (result, error, id) => [{ type: "Customers", id }],
+    }),
+
+    getCustomerStats: builder.query<any, void>({
+      query: () => "/customers/stats",
+      providesTags: ["Customers"],
+    }),
+
     createCustomer: builder.mutation<any, any>({
       query: (data) => ({
         url: "/customers",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Customers"],
+    }),
+
+    updateCustomer: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/customers/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Customers", id },
+        "Customers",
+        "Statements",
+      ],
+    }),
+
+    deleteCustomer: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/customers/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Customers"],
     }),
 
     getCustomerStatement: builder.query<any, string>({
@@ -81,7 +113,11 @@ export const customersApi = apiSlice.injectEndpoints({
 
 export const {
   useGetCustomersQuery,
+  useGetCustomerQuery,
+  useGetCustomerStatsQuery,
   useCreateCustomerMutation,
+  useUpdateCustomerMutation,
+  useDeleteCustomerMutation,
   useGetCustomerStatementQuery,
   useGetCustomerSummaryQuery,
   useGetCustomerRecordsQuery,
