@@ -82,7 +82,7 @@ export default function AddTransactionForm({
               disabled={
                 isSubmitting || (selectedCustomer ? exceedsCreditLimit : false)
               }
-              className="w-full"
+              className="w-full bg-violet-800 "
               size="lg"
             >
               {isSubmitting ? (

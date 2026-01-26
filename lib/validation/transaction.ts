@@ -3,8 +3,7 @@ import { z } from "zod";
 export const transactionSchema = z.object({
   type: z.enum(["DEBIT", "CREDIT"]),
 
-  amount: z.coerce.number().positive("المبلغ لازم يكون أكبر من صفر"),
-
+  amount: z.preprocess((val) => Number(val), z.number().positive()),
   description: z.string().min(3, "الوصف قصير جدًا").max(200, "الوصف طويل"),
 
   paymentMethod: z.enum(["CASH", "TRANSFER", "CHEQUE"]),
