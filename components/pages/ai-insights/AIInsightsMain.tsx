@@ -47,14 +47,16 @@ function parseAdvice(advice: string) {
 
     if (
       lowerLine.includes("executive summary") ||
-      lowerLine.includes("ملخص تنفيذي")
+      line.includes("الملخص التنفيذي") ||
+      line.includes("ملخص تنفيذي")
     ) {
       currentSection = "summary";
       continue;
     }
     if (
       lowerLine.includes("financial risk") ||
-      lowerLine.includes("المخاطر") ||
+      line.includes("المخاطر المالية") ||
+      line.includes("المخاطر") ||
       lowerLine.includes("risk")
     ) {
       currentSection = "risks";
@@ -62,16 +64,17 @@ function parseAdvice(advice: string) {
     }
     if (
       lowerLine.includes("recommendation") ||
-      lowerLine.includes("التوصيات") ||
+      line.includes("التوصيات المحاسبية") ||
+      line.includes("التوصيات") ||
       lowerLine.includes("accounting")
     ) {
       currentSection = "recommendations";
       continue;
     }
 
-    const cleanLine = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+    const cleanLine = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").replace(/^\*\*.*?\*\*:?\s*/, "").trim();
 
-    if (!cleanLine) continue;
+    if (!cleanLine || cleanLine.startsWith("**")) continue;
 
     if (currentSection === "summary") {
       sections.executiveSummary += (sections.executiveSummary ? " " : "") + cleanLine;

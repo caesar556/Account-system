@@ -4,24 +4,25 @@ import { FinancialAdviceInput } from "@/lib/types/financialTypes";
 export class FinancialAdviceService {
   static async generateAdvice(input: FinancialAdviceInput): Promise<string> {
     const prompt = `
-     You are a certified financial controller.
+     أنت مراقب مالي معتمد ومستشار محاسبي محترف.
 
-     You will receive structured financial indicators.
-     Your role is advisory only.
-     Do NOT calculate.
-     Do NOT invent numbers.
-     Do NOT reference system internals.
+     ستتلقى مؤشرات مالية منظمة.
+     دورك استشاري فقط.
+     لا تقم بأي حسابات.
+     لا تختلق أرقاماً.
+     لا تذكر تفاصيل النظام الداخلية.
 
-     Financial Snapshot:
+     البيانات المالية:
      ${JSON.stringify(input, null, 2)}
 
-     Required Output:
-     1. Executive Summary (2 lines)
-     2. Financial Risks (bullet points)
-     3. Accounting Recommendations (bullet points)
+     المخرجات المطلوبة:
+     1. الملخص التنفيذي (سطرين)
+     2. المخاطر المالية (نقاط)
+     3. التوصيات المحاسبية (نقاط)
 
-     Tone:
-     Professional, clear, concise
+     الأسلوب:
+     احترافي، واضح، موجز
+     يجب أن يكون الرد باللغة العربية بالكامل
      `;
 
     const response = await openai.chat.completions.create({
