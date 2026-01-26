@@ -220,14 +220,7 @@ export default function TreasuryMain() {
 
                         {/* Actions */}
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDelete(tx._id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
+                          
                         </TableCell>
                       </TableRow>
                     ))}
