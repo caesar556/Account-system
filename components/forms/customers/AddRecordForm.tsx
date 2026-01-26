@@ -26,7 +26,7 @@ interface AddRecordFormProps {
 }
 
 export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
-  const form = useForm<RecordFormValues>({
+  const form = useForm({
     resolver: zodResolver(recordSchema),
     defaultValues: {
       customerId,

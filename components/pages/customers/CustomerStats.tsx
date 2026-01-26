@@ -8,11 +8,11 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
-import { useCustomers } from "@/hooks/data/useCustomers";
 import { Progress } from "@/components/ui/progress";
+import { useCustomerStats } from "@/hooks/data/useCustomerStats";
 
 export default function CustomerStats() {
-  const { stats } = useCustomers();
+  const { stats } = useCustomerStats();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <Card className="bg-gradient-to-br from-background to-muted/50">
@@ -22,18 +22,18 @@ export default function CustomerStats() {
               <p className="text-sm font-medium text-muted-foreground">
                 إجمالي العملاء
               </p>
-              <p className="text-2xl font-bold mt-1">{stats.totalCustomers}</p>
+              <p className="text-2xl font-bold mt-1">{stats.customers.total}</p>
             </div>
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
               <User className="h-5 w-5 text-primary" />
             </div>
           </div>
           <Progress
-            value={(stats.activeCustomers / stats.totalCustomers) * 100}
+            value={(stats.customers.active / stats.customers.total) * 100}
             className="mt-4"
           />
           <p className="text-xs text-muted-foreground mt-2">
-            {stats.activeCustomers} عميل نشط
+            {stats.customers.active} عميل نشط
           </p>
         </CardContent>
       </Card>
@@ -46,7 +46,7 @@ export default function CustomerStats() {
                 إجمالي المديونيات
               </p>
               <p className="text-2xl font-bold mt-1 text-red-600">
-                {stats.totalDebt.toLocaleString()} ج.م
+                {stats.transactions.totalDebit} ج.م
               </p>
             </div>
             <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
@@ -64,7 +64,7 @@ export default function CustomerStats() {
                 إجمالي الأرصدة
               </p>
               <p className="text-2xl font-bold mt-1 text-green-600">
-                {stats.totalCredit.toLocaleString()} ج.م
+                {stats.transactions.totalCredit} ج.م
               </p>
             </div>
             <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
@@ -81,7 +81,9 @@ export default function CustomerStats() {
               <p className="text-sm font-medium text-muted-foreground">
                 عملاء VIP
               </p>
-              <p className="text-2xl font-bold mt-1">{stats.vipCustomers}</p>
+              <p className="text-2xl font-bold mt-1">
+                {stats.customers.byCategory.vip ?? 0}
+              </p>
             </div>
             <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center">
               <Building className="h-5 w-5 text-amber-600" />
@@ -98,7 +100,7 @@ export default function CustomerStats() {
                 الحالة
               </p>
               <div className="flex items-center gap-2 mt-1">
-                {stats.activeCustomers === stats.totalCustomers ? (
+                {stats.customers.active === stats.customers.total ? (
                   <>
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <span className="font-bold text-green-600">
@@ -109,7 +111,7 @@ export default function CustomerStats() {
                   <>
                     <AlertCircle className="h-4 w-4 text-amber-600" />
                     <span className="font-bold">
-                      {stats.totalCustomers - stats.activeCustomers} غير نشطين
+                      {stats.customers.inactive} غير نشطين
                     </span>
                   </>
                 )}

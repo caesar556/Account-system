@@ -3,8 +3,8 @@
 import {
   Wallet,
   Users,
-  BarChart3,
   LayoutDashboard,
+  Settings,
   ShieldCheck,
   CreditCard,
 } from "lucide-react";
@@ -40,14 +40,14 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: "المدفوعات",
+    title: "الإلتزامات",
     url: "/payments",
     icon: CreditCard,
   },
   {
-    title: "التقارير",
-    url: "/reports",
-    icon: BarChart3,
+    title: "الذكاء الاصطناعي",
+    url: "/ai-insights",
+    icon: Settings,
   },
 ];
 

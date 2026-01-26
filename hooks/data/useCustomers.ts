@@ -44,36 +44,8 @@ export function useCustomers() {
     });
   }, [customers, search, statusFilter, categoryFilter, balanceFilter]);
 
-  const stats = useMemo(() => {
-    const customerList = Array.isArray(customers) ? customers : [];
-    const totalCustomers = customerList.length;
-    const activeCustomers = customerList.filter((c: any) => c.isActive).length;
-    const totalDebt = customerList.reduce(
-      (sum: number, c: any) =>
-        sum + (c.currentBalance > 0 ? c.currentBalance : 0),
-      0,
-    );
-    const totalCredit = customerList.reduce(
-      (sum: number, c: any) =>
-        sum + (c.currentBalance < 0 ? Math.abs(c.currentBalance) : 0),
-      0,
-    );
-    const vipCustomers = customerList.filter(
-      (c: any) => c.category === "vip",
-    ).length;
-
-    return {
-      totalCustomers,
-      activeCustomers,
-      totalDebt,
-      totalCredit,
-      vipCustomers,
-    };
-  }, [customers]);
-
   return {
     customers: filteredCustomers,
-    stats,
     isLoading,
     error,
     search,

@@ -19,11 +19,9 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
 
-    // The form sends 'status', but the model uses 'isActive' and we calculate balance.
-    // Let's ensure the body is compatible.
     const customerData = {
       ...body,
-      isActive: true, // New customers are active by default
+      isActive: true,
     };
 
     const customer = await Customer.create(customerData);

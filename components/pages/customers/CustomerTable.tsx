@@ -24,18 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CheckCircle,
-  CreditCard,
-  FileText,
-  Mail,
-  MapPin,
-  MoreVertical,
-  Phone,
-  TrendingUp,
-  User,
-  XCircle,
-} from "lucide-react";
+import { FileText, MapPin, MoreVertical, Phone, User } from "lucide-react";
 import Link from "next/link";
 import { useCustomers } from "@/hooks/data/useCustomers";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -267,15 +256,15 @@ export default function CustomerTable() {
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Link
-                                  href={`/customers/${customer._id}/edit`}
-                                  className="w-full text-right"
-                                >
+                                <Button className="w-full text-right">
                                   تعديل البيانات
-                                </Link>
+                                </Button>
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-red-600 text-right">
                                 تعطيل الحساب
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-right text-red-600">
+                                <Button>حذف الحساب</Button>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
