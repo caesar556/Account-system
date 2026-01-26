@@ -4,7 +4,7 @@ import {
   Wallet,
   Users,
   LayoutDashboard,
-  Settings,
+  Brain,
   ShieldCheck,
   CreditCard,
 } from "lucide-react";
@@ -47,7 +47,7 @@ const menuItems = [
   {
     title: "الذكاء الاصطناعي",
     url: "/ai-insights",
-    icon: Settings,
+    icon: Brain,
   },
 ];
 
