@@ -6,11 +6,13 @@ import { CashTransaction } from "@/models/CashTransaction";
 export async function GET() {
   try {
     await dbConnect();
-    
+
     const totalCustomers = await Customer.countDocuments({});
     const activeCustomers = await Customer.countDocuments({ isActive: true });
-    const inactiveCustomers = await Customer.countDocuments({ isActive: false });
-    
+    const inactiveCustomers = await Customer.countDocuments({
+      isActive: false,
+    });
+
     const customersByCategory = await Customer.aggregate([
       {
         $group: {
@@ -19,7 +21,7 @@ export async function GET() {
         },
       },
     ]);
-    
+
     const transactionStats = await CashTransaction.aggregate([
       {
         $match: {
@@ -34,13 +36,50 @@ export async function GET() {
           count: { $sum: 1 },
         },
       },
+
+      {
+        $unionWith: {
+          coll: "customers",
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+                type: "DEBIT",
+                amount: { $ifNull: ["$openingBalance", 0] },
+              },
+            },
+            {
+              $match: { amount: { $ne: 0 } },
+            },
+            {
+              $group: {
+                _id: "$type",
+                total: { $sum: "$amount" },
+                count: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $group: {
+          _id: "$_id",
+          total: { $sum: "$total" },
+          count: { $sum: "$count" },
+        },
+      },
     ]);
-    
-    const totalDebit = transactionStats.find((t) => t._id === "DEBIT")?.total || 0;
-    const totalCredit = transactionStats.find((t) => t._id === "CREDIT")?.total || 0;
-    const debitCount = transactionStats.find((t) => t._id === "DEBIT")?.count || 0;
-    const creditCount = transactionStats.find((t) => t._id === "CREDIT")?.count || 0;
-    
+
+    const totalDebit =
+      transactionStats.find((t) => t._id === "DEBIT")?.total || 0;
+    const totalCredit =
+      transactionStats.find((t) => t._id === "CREDIT")?.total || 0;
+    const debitCount =
+      transactionStats.find((t) => t._id === "DEBIT")?.count || 0;
+    const creditCount =
+      transactionStats.find((t) => t._id === "CREDIT")?.count || 0;
+
     const customersWithBalances = await Customer.aggregate([
       {
         $lookup: {
@@ -76,7 +115,9 @@ export async function GET() {
           currentBalance: {
             $add: [
               { $ifNull: ["$openingBalance", 0] },
-              { $ifNull: [{ $arrayElemAt: ["$transactions.txBalance", 0] }, 0] },
+              {
+                $ifNull: [{ $arrayElemAt: ["$transactions.txBalance", 0] }, 0],
+              },
             ],
           },
         },
@@ -98,7 +139,7 @@ export async function GET() {
         },
       },
     ]);
-    
+
     const balanceStats = customersWithBalances[0] || {
       totalBalance: 0,
       positiveBalanceCount: 0,
@@ -106,12 +147,12 @@ export async function GET() {
       zeroBalanceCount: 0,
       totalCreditLimit: 0,
     };
-    
+
     const categoryMap: Record<string, number> = {};
     customersByCategory.forEach((c) => {
       categoryMap[c._id || "regular"] = c.count;
     });
-    
+
     return NextResponse.json({
       customers: {
         total: totalCustomers,

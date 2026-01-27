@@ -256,15 +256,15 @@ export default function CustomerTable() {
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
-                                <Button className="w-full text-right">
+                                <Link href="/" className="w-full text-right">
                                   تعديل البيانات
-                                </Button>
+                                </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-red-600 text-right">
                                 تعطيل الحساب
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-right text-red-600">
-                                <Button>حذف الحساب</Button>
+                                <button>حذف الحساب</button>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
