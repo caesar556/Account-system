@@ -10,25 +10,16 @@ import { useCustomersRecords } from "@/hooks/data/useCustomersRecords";
 
 export default function RecordsStats() {
   const { summary } = useCustomersRecords();
-  const unpaidAmount = summary?.records?.totalUnpaid || 0;
-  const hasUnpaid = unpaidAmount > 0;
+  const currentBalance = summary?.balance?.current || 0;
+  const shouldPay = currentBalance > 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card className="border-r-4 border-r-blue-500 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardDescription>إجمالي الرصيد</CardDescription>
-          <CardTitle className="text-2xl flex items-center">
-            <DollarSign className="w-5 h-5 ml-1 text-blue-500" />
-            {summary?.balance?.current?.toLocaleString() || 0}
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <Card className={`shadow-sm border-r-4 ${hasUnpaid ? 'border-r-red-500 bg-red-50' : 'border-r-green-500 bg-green-50'}`}>
+      <Card className={`shadow-sm border-r-4 ${shouldPay ? 'border-r-red-500 bg-red-50' : 'border-r-green-500 bg-green-50'}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardDescription>حالة الدفع</CardDescription>
-            {hasUnpaid ? (
+            {shouldPay ? (
               <Badge className="bg-red-500 hover:bg-red-600 text-white animate-pulse">
                 <AlertCircle className="w-3 h-3 ml-1" />
                 يجب الدفع
@@ -40,10 +31,19 @@ export default function RecordsStats() {
               </Badge>
             )}
           </div>
-          <CardTitle className={`text-2xl flex items-center ${hasUnpaid ? 'text-red-600' : 'text-green-600'}`}>
-            <Receipt className={`w-5 h-5 ml-1 ${hasUnpaid ? 'text-red-500' : 'text-green-500'}`} />
-            {unpaidAmount.toLocaleString()}
-            <span className="text-sm font-normal mr-2">غير مدفوع</span>
+          <CardTitle className={`text-2xl flex items-center ${shouldPay ? 'text-red-600' : 'text-green-600'}`}>
+            <DollarSign className={`w-5 h-5 ml-1 ${shouldPay ? 'text-red-500' : 'text-green-500'}`} />
+            {currentBalance.toLocaleString()}
+            <span className="text-sm font-normal mr-2">{shouldPay ? 'مستحق الدفع' : 'الرصيد'}</span>
+          </CardTitle>
+        </CardHeader>
+      </Card>
+      <Card className="border-r-4 border-r-orange-500 shadow-sm">
+        <CardHeader className="pb-2">
+          <CardDescription>السجلات غير المدفوعة</CardDescription>
+          <CardTitle className="text-2xl flex items-center">
+            <Receipt className="w-5 h-5 ml-1 text-orange-500" />
+            {summary?.records?.totalUnpaid?.toLocaleString() || 0}
           </CardTitle>
         </CardHeader>
       </Card>
