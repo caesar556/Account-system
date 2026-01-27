@@ -19,6 +19,7 @@ export class StatementService {
     customer: any;
     statement: StatementEntry[];
     currentBalance: number;
+    openingBalance?: number;
   }> {
     const customer = await Customer.findById(customerId).lean();
     if (!customer) throw new Error("Customer not found");
@@ -28,36 +29,52 @@ export class StatementService {
       CashTransaction.find({ customerId }).sort({ createdAt: 1 }).lean(),
     ]);
 
-    // 1️⃣ حوّل الفواتير Entries
-    const invoiceEntries = records.map((record) => ({
-      id: record._id.toString(),
-      date: record.createdAt,
-      type: "INVOICE" as const,
-      title: record.title,
-      description: record.description,
-      debit: record.totalAmount,
-      credit: 0,
-      referenceId: record._id.toString(),
-    }));
+    const openingBalance = customer.openingBalance || 0;
 
-    // 2️⃣ حوّل المعاملات Entries
-    const transactionEntries = transactions.map((tx) => ({
-      id: tx._id.toString(),
-      date: tx.createdAt,
-      type: "PAYMENT" as const,
-      title: tx.description,
-      description: tx.paymentMethod,
-      debit: tx.type === "DEBIT" ? tx.amount : 0,
-      credit: tx.type === "CREDIT" ? tx.amount : 0,
-      referenceId: tx.referenceId,
-    }));
-
-    // 3️⃣ دمج + ترتيب
-    const events = [...invoiceEntries, ...transactionEntries].sort(
-      (a, b) => a.date.getTime() - b.date.getTime(),
+    const invoiceEntries: Omit<StatementEntry, "balance">[] = records.map(
+      (record) => ({
+        id: record._id.toString(),
+        date: record.createdAt,
+        type: "INVOICE" as const,
+        title: record.title,
+        description: record.description,
+        debit: record.totalAmount,
+        credit: 0,
+        referenceId: record._id.toString(),
+      }),
     );
 
-    // 4️⃣ Running balance
+    const transactionEntries: Omit<StatementEntry, "balance">[] =
+      transactions.map((tx) => ({
+        id: tx._id.toString(),
+        date: tx.createdAt,
+        type: "PAYMENT" as const,
+        title: tx.description,
+        description: tx.paymentMethod,
+        debit: tx.type === "DEBIT" ? tx.amount : 0,
+        credit: tx.type === "CREDIT" ? tx.amount : 0,
+        referenceId: tx.referenceId,
+      }));
+
+    const openingEntry: Omit<StatementEntry, "balance"> | null =
+      openingBalance !== 0
+        ? {
+            id: "OPENING_BALANCE",
+            date: customer.createdAt,
+            type: "TRANSACTION",
+            title: "Opening Balance",
+            description: "رصيد افتتاحي",
+            debit: openingBalance > 0 ? openingBalance : 0,
+            credit: openingBalance < 0 ? Math.abs(openingBalance) : 0,
+          }
+        : null;
+
+    const events: Omit<StatementEntry, "balance">[] = [
+      ...(openingEntry ? [openingEntry] : []),
+      ...invoiceEntries,
+      ...transactionEntries,
+    ].sort((a, b) => a.date.getTime() - b.date.getTime());
+
     let balance = 0;
     const statement = events.map((e) => {
       balance = balance + e.debit - e.credit;
