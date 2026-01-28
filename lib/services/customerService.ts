@@ -37,42 +37,38 @@ export class CustomerService {
     const customer = await Customer.findById(customerId);
     if (!customer) throw new Error("Customer not found");
 
-    const currentBalance = await this.getCurrentBalance(customerId);
+    const transactions = await CashTransaction.find({ customerId }).lean();
 
-    const transactions = await CashTransaction.aggregate([
-      { $match: { customerId: new Types.ObjectId(customerId) } },
-      {
-        $group: {
-          _id: "$type",
-          total: { $sum: "$amount" },
-          count: { $sum: 1 },
-        },
-      },
-    ]);
+    const totalDebit = transactions
+      .filter((t) => t.type === "DEBIT")
+      .reduce((sum, t) => sum + t.amount, 0);
 
-    const totalDebit = transactions.find((t) => t._id === "DEBIT")?.total || 0;
-    const totalCredit =
-      transactions.find((t) => t._id === "CREDIT")?.total || 0;
+    const totalCredit = transactions
+      .filter((t) => t.type === "CREDIT")
+      .reduce((sum, t) => sum + t.amount, 0);
 
-    const records = await CustomerRecord.aggregate([
-      { $match: { customerId: new Types.ObjectId(customerId) } },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          totalAmount: { $sum: "$totalAmount" },
-          paidAmount: { $sum: "$paidAmount" },
-        },
-      },
-    ]);
+    const currentBalance = totalDebit - totalCredit;
 
-    const unpaidRecords = records.filter(
-      (r) => r._id === "PENDING" || r._id === "PARTIAL",
-    );
-    const totalUnpaid = unpaidRecords.reduce(
-      (sum, r) => sum + (r.totalAmount - r.paidAmount),
-      0,
-    );
+    const records = await CustomerRecord.find({ customerId }).lean();
+
+    let totalUnpaid = 0;
+    let unpaidCount = 0;
+
+    records.forEach((record) => {
+      const payments = transactions.filter(
+        (tx) =>
+          tx.referenceType === "CUSTOMER_RECORD" &&
+          tx.referenceId.toString() === record._id.toString() &&
+          tx.type === "CREDIT",
+      );
+      const paidAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+      const remaining = Math.max(0, record.totalAmount - paidAmount);
+
+      if (remaining > 0) {
+        totalUnpaid += remaining;
+        unpaidCount += 1;
+      }
+    });
 
     return {
       customer: {
@@ -94,12 +90,12 @@ export class CustomerService {
       transactions: {
         totalDebit,
         totalCredit,
-        debitCount: transactions.find((t) => t._id === "DEBIT")?.count || 0,
-        creditCount: transactions.find((t) => t._id === "CREDIT")?.count || 0,
+        debitCount: transactions.filter((t) => t.type === "DEBIT").length,
+        creditCount: transactions.filter((t) => t.type === "CREDIT").length,
       },
       records: {
         totalUnpaid,
-        unpaidCount: unpaidRecords.reduce((sum, r) => sum + r.count, 0),
+        unpaidCount,
       },
     };
   }

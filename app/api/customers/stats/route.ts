@@ -7,6 +7,10 @@ export async function GET() {
   try {
     await dbConnect();
 
+    /* ===============================
+       Customers basic stats
+    =============================== */
+
     const totalCustomers = await Customer.countDocuments({});
     const activeCustomers = await Customer.countDocuments({ isActive: true });
     const inactiveCustomers = await Customer.countDocuments({
@@ -22,6 +26,11 @@ export async function GET() {
       },
     ]);
 
+    /* ===============================
+       Transactions stats (global)
+       + Opening balance as DEBIT
+    =============================== */
+
     const transactionStats = await CashTransaction.aggregate([
       {
         $match: {
@@ -36,7 +45,6 @@ export async function GET() {
           count: { $sum: 1 },
         },
       },
-
       {
         $unionWith: {
           coll: "customers",
@@ -48,9 +56,7 @@ export async function GET() {
                 amount: { $ifNull: ["$openingBalance", 0] },
               },
             },
-            {
-              $match: { amount: { $ne: 0 } },
-            },
+            { $match: { amount: { $ne: 0 } } },
             {
               $group: {
                 _id: "$type",
@@ -61,7 +67,6 @@ export async function GET() {
           ],
         },
       },
-
       {
         $group: {
           _id: "$_id",
@@ -75,12 +80,19 @@ export async function GET() {
       transactionStats.find((t) => t._id === "DEBIT")?.total || 0;
     const totalCredit =
       transactionStats.find((t) => t._id === "CREDIT")?.total || 0;
+
     const debitCount =
       transactionStats.find((t) => t._id === "DEBIT")?.count || 0;
     const creditCount =
       transactionStats.find((t) => t._id === "CREDIT")?.count || 0;
 
+    /* ===============================
+       Customers balances
+       (Opening + Transactions + Unpaid Records)
+    =============================== */
+
     const customersWithBalances = await Customer.aggregate([
+      // 🔹 Transactions balance
       {
         $lookup: {
           from: "cashtransactions",
@@ -110,18 +122,88 @@ export async function GET() {
           as: "transactions",
         },
       },
+
+      // 🔹 Unpaid / partial records
+      {
+        $lookup: {
+          from: "customerrecords",
+          let: { customerId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$customerId", "$$customerId"] },
+                status: { $in: ["PARTIAL"] },
+              },
+            },
+            {
+              $lookup: {
+                from: "cashtransactions",
+                let: { recordId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$referenceId", "$$recordId"] },
+                      type: "CREDIT",
+                      deletedAt: { $exists: false },
+                    },
+                  },
+                  {
+                    $group: {
+                      _id: null,
+                      paid: { $sum: "$amount" },
+                    },
+                  },
+                ],
+                as: "payments",
+              },
+            },
+            {
+              $addFields: {
+                paid: {
+                  $ifNull: [{ $arrayElemAt: ["$payments.paid", 0] }, 0],
+                },
+                remaining: {
+                  $subtract: [
+                    "$totalAmount",
+                    {
+                      $ifNull: [{ $arrayElemAt: ["$payments.paid", 0] }, 0],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                remaining: 1,
+              },
+            },
+          ],
+          as: "unpaidRecords",
+        },
+      },
+
+      // 🔹 Final balance per customer
       {
         $addFields: {
+          txBalance: {
+            $ifNull: [{ $arrayElemAt: ["$transactions.txBalance", 0] }, 0],
+          },
+          unpaidAmount: {
+            $sum: "$unpaidRecords.remaining",
+          },
           currentBalance: {
             $add: [
               { $ifNull: ["$openingBalance", 0] },
               {
                 $ifNull: [{ $arrayElemAt: ["$transactions.txBalance", 0] }, 0],
               },
+              { $sum: "$unpaidRecords.remaining" },
             ],
           },
         },
       },
+
+      // 🔹 Global balances stats
       {
         $group: {
           _id: null,
@@ -135,7 +217,9 @@ export async function GET() {
           zeroBalanceCount: {
             $sum: { $cond: [{ $eq: ["$currentBalance", 0] }, 1, 0] },
           },
-          totalCreditLimit: { $sum: { $ifNull: ["$creditLimit", 0] } },
+          totalCreditLimit: {
+            $sum: { $ifNull: ["$creditLimit", 0] },
+          },
         },
       },
     ]);
@@ -148,10 +232,18 @@ export async function GET() {
       totalCreditLimit: 0,
     };
 
+    /* ===============================
+       Format category map
+    =============================== */
+
     const categoryMap: Record<string, number> = {};
     customersByCategory.forEach((c) => {
       categoryMap[c._id || "regular"] = c.count;
     });
+
+    /* ===============================
+       Response
+    =============================== */
 
     return NextResponse.json({
       customers: {

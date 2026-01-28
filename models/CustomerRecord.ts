@@ -17,17 +17,11 @@ const CustomerRecordSchema = new mongoose.Schema(
       min: 0,
     },
 
-    paidAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
     dueDate: Date,
 
     status: {
       type: String,
-      enum: ["OPEN", "PARTIAL", "PAID", "CANCELLED", "PENDING"],
+      enum: ["OPEN", "PARTIAL", "PAID", "CANCELLED"],
       default: "OPEN",
     },
   },

@@ -28,10 +28,10 @@ export default function StatementSummary({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-black mb-1">{customer.name}</div>
+          <div className="text-2xl font-black mb-1">{customer?.name || "-"}</div>
           <div className="flex items-center text-sm text-muted-foreground font-medium">
             <Phone className="ml-2 h-4 w-4" />
-            {customer.phone}
+            {customer?.phone || "-"}
           </div>
         </CardContent>
       </Card>

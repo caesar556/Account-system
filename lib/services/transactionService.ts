@@ -87,11 +87,29 @@ export class TransactionService {
         throw new Error("Record already fully paid");
       }
 
-      const remaining = record.totalAmount - record.paidAmount;
-
       if (data.amount <= 0) {
         throw new Error("Payment amount must be positive");
       }
+
+      // 🔹 احسب المدفوع سابقًا
+      const paidAgg = await CashTransaction.aggregate([
+        {
+          $match: {
+            referenceType: "CUSTOMER_RECORD",
+            referenceId: record._id,
+            type: "CREDIT",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$amount" },
+          },
+        },
+      ]);
+
+      const totalPaid = paidAgg[0]?.total || 0;
+      const remaining = record.totalAmount - totalPaid;
 
       if (data.amount > remaining) {
         throw new Error(
@@ -99,27 +117,35 @@ export class TransactionService {
         );
       }
 
-      const transaction = await this.createTransaction({
-        treasuryId: data.treasuryId,
-        customerId: record.customerId.toString(),
-        type: "CREDIT",
-        amount: data.amount,
-        paymentMethod: data.paymentMethod,
-        description: data.description || `Payment for ${record.title}`,
-        referenceType: "CUSTOMER_RECORD",
-        referenceId: record._id.toString(),
-      });
+      const transaction = await CashTransaction.create(
+        [
+          {
+            treasuryId: data.treasuryId,
+            customerId: record.customerId,
+            type: "CREDIT",
+            amount: data.amount,
+            paymentMethod: data.paymentMethod,
+            description: data.description || `دفع للسجل  ${record.title}`,
+            referenceType: "CUSTOMER_RECORD",
+            referenceId: record._id,
+          },
+        ],
+        { session },
+      );
 
-      record.paidAmount += data.amount;
-      record.status =
-        record.paidAmount >= record.totalAmount ? "PAID" : "PARTIAL";
+      const newPaidTotal = totalPaid + data.amount;
+      record.status = newPaidTotal === record.totalAmount ? "PAID" : "PARTIAL";
+
       await record.save({ session });
 
       await session.commitTransaction();
 
-      return { transaction, record };
+      return {
+        transaction: transaction[0],
+        record,
+        remainingAfter: record.totalAmount - newPaidTotal,
+      };
     } catch (error) {
-      console.log("service error", error);
       await session.abortTransaction();
       throw error;
     } finally {

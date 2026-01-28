@@ -33,7 +33,6 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
       title: "",
       description: "",
       totalAmount: 0,
-      paidAmount: 0,
       status: "OPEN",
       dueDate: undefined,
     },
@@ -80,29 +79,6 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>المبلغ الإجمالي</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    value={field.value as any}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="paidAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>المبلغ المدفوع</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

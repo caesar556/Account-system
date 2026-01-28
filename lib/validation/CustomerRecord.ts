@@ -12,8 +12,6 @@ export const recordSchema = z.object({
 
   totalAmount: z.coerce.number().min(1, "المبلغ يجب أن يكون أكبر من صفر"),
 
-  paidAmount: z.coerce.number().min(0, "المبلغ المدفوع يجب أن يكون أكبر من أو يساوي صفر"),
-
   status: z.enum(["OPEN", "PARTIAL", "PAID", "CANCELLED", "PENDING"]),
 
   dueDate: z

@@ -1,5 +1,7 @@
 "use client";
-import { useGetCustomersQuery } from "@/store/customers/customersApi";
+import {
+  useGetCustomersQuery,
+} from "@/store/customers/customersApi";
 import { useMemo, useState } from "react";
 
 export function useCustomers() {
