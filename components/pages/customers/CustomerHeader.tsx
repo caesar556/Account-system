@@ -33,14 +33,16 @@ export default function CustomerHeader({ open, setOpen }: CustomerHeaderProps) {
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 bg-violet-800 hover:bg-violet-700 transition duration-200">
               <Plus className="h-4 w-4" />
               إضافة عميل
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-right">إضافة عميل جديد</DialogTitle>
+              <DialogTitle className="text-right mt-6 ">
+                إضافة عميل جديد
+              </DialogTitle>
             </DialogHeader>
             <CustomerForm onSuccess={() => setOpen(false)} />
           </DialogContent>

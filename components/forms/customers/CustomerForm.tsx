@@ -58,7 +58,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
   }
 
   return (
-    <Form {...form}>
+    <Form  {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-6 pt-4"

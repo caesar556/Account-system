@@ -26,7 +26,7 @@ export default function RecordsHeader() {
       </div>
       <Dialog open={isAddRecordOpen} onOpenChange={setIsAddRecordOpen}>
         <DialogTrigger asChild>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button className="bg-violet-600 hover:bg-violet-700">
             <Plus className="w-4 h-4 ml-2" />
             إضافة سجل جديد
           </Button>
