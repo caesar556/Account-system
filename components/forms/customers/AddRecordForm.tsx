@@ -19,6 +19,7 @@ import {
   RecordFormValues,
   recordSchema,
 } from "@/lib/validation/CustomerRecord";
+import { useState } from "react";
 
 interface AddRecordFormProps {
   customerId: string;
@@ -26,6 +27,7 @@ interface AddRecordFormProps {
 }
 
 export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
+  const [isSubmiting, setIsSubmiting] = useState(false);
   const form = useForm({
     resolver: zodResolver(recordSchema),
     defaultValues: {
@@ -34,7 +36,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
       description: "",
       totalAmount: 0,
       status: "OPEN",
-      dueDate: undefined,
+      dueDate: "",
     },
   });
 
@@ -47,6 +49,8 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
       });
 
       if (!response.ok) throw new Error("فشل في إضافة السجل");
+
+      setIsSubmiting(true);
 
       toast.success("تم إضافة السجل بنجاح");
       onSuccess();
@@ -128,6 +132,7 @@ export function AddRecordForm({ customerId, onSuccess }: AddRecordFormProps) {
         <Button
           type="submit"
           className="w-full bg-violet-600 hover:bg-violet-700"
+          disabled={isSubmiting}
         >
           إضافة السجل
         </Button>

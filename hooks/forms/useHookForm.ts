@@ -46,7 +46,7 @@ export function useTransactionForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const form = useForm<z.input<typeof transactionSchema>>({
+  const form = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: defaultType,
