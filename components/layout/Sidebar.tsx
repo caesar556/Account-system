@@ -41,7 +41,7 @@ const menuItems = [
   },
   {
     title: "الإلتزامات",
-    url: "/payments",
+    url: "/obligations",
     icon: CreditCard,
   },
   {
