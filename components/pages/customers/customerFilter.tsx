@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,16 +13,6 @@ import { Filter, Search, XCircle } from "lucide-react";
 import { useCustomers } from "@/hooks/data/useCustomers";
 
 export default function CustomerFilter() {
-  const {
-    search,
-    setSearch,
-    statusFilter,
-    setStatusFilter,
-    categoryFilter,
-    setCategoryFilter,
-    balanceFilter,
-    setBalanceFilter,
-  } = useCustomers();
   return (
     <Card>
       <CardContent className="pt-6">
@@ -39,7 +29,7 @@ export default function CustomerFilter() {
 
           <div className="flex flex-wrap gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[160px]">
                 <Filter className="h-4 w-4 ml-2" />
                 <SelectValue placeholder="الحالة" />
               </SelectTrigger>
@@ -70,7 +60,6 @@ export default function CustomerFilter() {
                 <SelectItem value="all">الكل</SelectItem>
                 <SelectItem value="debt">مدينون</SelectItem>
                 <SelectItem value="credit">دائنون</SelectItem>
-                <SelectItem value="clear">خلاص</SelectItem>
               </SelectContent>
             </Select>
 

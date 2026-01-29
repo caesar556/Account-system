@@ -50,7 +50,6 @@ export default function TreasuryMain() {
     currentPage,
     setCurrentPage,
     totalPages,
-    handleDelete,
     totalItems,
   } = useTransactions();
 

@@ -6,7 +6,7 @@ export const apiSlice = createApi({
     baseUrl: "/api",
     credentials: "include",
   }),
-  tagTypes: ["Transactions", "Treasury", "Analytics", "Customers", "Statements", "CustomerRecords"],
+  tagTypes: ["Transactions", "Treasury", "Analytics", "Customers", "Statements", "CustomerRecords", "Obligation"],
   endpoints: (builder) => ({
     getStatement: builder.query<{
       customer: { _id: string; name: string; phone: string };

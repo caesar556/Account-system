@@ -1,7 +1,5 @@
 "use client";
-import {
-  useGetCustomersQuery,
-} from "@/store/customers/customersApi";
+import { useGetCustomersQuery } from "@/store/customers/customersApi";
 import { useMemo, useState } from "react";
 
 export function useCustomers() {
@@ -45,6 +43,11 @@ export function useCustomers() {
       );
     });
   }, [customers, search, statusFilter, categoryFilter, balanceFilter]);
+
+  const handleReverse = async () => {
+    try {
+    } catch (err) {}
+  };
 
   return {
     customers: filteredCustomers,

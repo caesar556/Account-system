@@ -7,10 +7,6 @@ export const customersApi = apiSlice.injectEndpoints({
       providesTags: ["Customers"],
     }),
 
-    getCustomer: builder.query<any, string>({
-      query: (customerId) => `/customers/${customerId}`,
-      providesTags: (result, error, id) => [{ type: "Customers", id }],
-    }),
 
     getCustomerStats: builder.query<any, void>({
       query: () => "/customers/stats",
@@ -113,7 +109,6 @@ export const customersApi = apiSlice.injectEndpoints({
 
 export const {
   useGetCustomersQuery,
-  useGetCustomerQuery,
   useGetCustomerStatsQuery,
   useCreateCustomerMutation,
   useUpdateCustomerMutation,

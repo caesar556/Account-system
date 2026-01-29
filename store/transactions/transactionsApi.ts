@@ -16,18 +16,11 @@ export const transactionsApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Transactions", "Treasury", "Analytics"],
     }),
 
-    deleteTransaction: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/transactions/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Transactions", "Treasury", "Analytics"],
-    }),
+    
   }),
 });
 
 export const {
   useGetTransactionsQuery,
   useCreateTransactionMutation,
-  useDeleteTransactionMutation,
 } = transactionsApi;

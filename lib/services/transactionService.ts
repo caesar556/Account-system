@@ -91,7 +91,6 @@ export class TransactionService {
         throw new Error("Payment amount must be positive");
       }
 
-      // 🔹 احسب المدفوع سابقًا
       const paidAgg = await CashTransaction.aggregate([
         {
           $match: {
@@ -148,6 +147,73 @@ export class TransactionService {
     } catch (error) {
       await session.abortTransaction();
       throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  static async reverseTransaction(params: {
+    transactionId: string;
+    reason: string;
+  }) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const original = await CashTransaction.findById(
+        params.transactionId,
+      ).session(session);
+
+      if (!original) throw new Error("Transaction not found");
+
+      if (original.isReversal)
+        throw new Error("Transaction is already a reversal");
+
+      const treasury = await Treasury.findById(original.treasuryId).session(
+        session,
+      );
+
+      if (!treasury || !treasury.isActive) {
+        throw new Error("Treasury not available");
+      }
+      const reversalType = original.type === "DEBIT" ? "CREDIT" : "DEBIT";
+
+      const [reversal] = await CashTransaction.create(
+        [
+          {
+            treasuryId: original.treasuryId,
+            customerId: original.customerId,
+            type: reversalType,
+            amount: original.amount,
+            paymentMethod: original.paymentMethod,
+            description: `معاملة مردودة ${original._id}`,
+            referenceType: "ADJUSTMENT",
+            referenceId: original._id,
+            isReversal: true,
+            reversedTransactionId: original._id,
+            reversalReason: params.reason,
+          },
+        ],
+        { session },
+      );
+
+      const treasuryChange =
+        reversalType === "CREDIT" ? original.amount : -original.amount;
+
+      await Treasury.findByIdAndUpdate(
+        original.treasuryId,
+        { $inc: { currentBalance: treasuryChange } },
+        { session },
+      );
+
+      original.isReversed = true;
+      await original.save({ session });
+
+      await session.commitTransaction();
+      return reversal;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
     } finally {
       session.endSession();
     }

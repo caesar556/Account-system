@@ -12,7 +12,6 @@ export default function CustomersMain() {
     <div className="p-6 space-y-6" dir="rtl">
       <CustomerHeader open={open} setOpen={setOpen} />
       <CustomerStats />
-      <CustomerFilter />
       <CustomerTable />
     </div>
   );
