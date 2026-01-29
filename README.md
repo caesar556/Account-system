@@ -1,36 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# نظام المحاسبة والخزينة (Account System)
 
-## Getting Started
+نظام محاسبة وإدارة خزينة باللغة العربية مبني باستخدام Next.js. يوفر التطبيق إدارة شاملة للتدفقات النقدية، تتبع العملاء، معالجة المدفوعات، والتقارير المالية.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## المميزات الرئيسية
+
+### 1. لوحة التحكم المالية (Dashboard)
+- عرض سريع للمؤشرات المالية الرئيسية
+- إجمالي الإيرادات والمصروفات
+- رصيد الخزينة المتاح
+- سجل المعاملات الأخيرة
+- رسوم بيانية تفاعلية للتحليل المالي
+
+### 2. إدارة الخزائن (Treasury Management)
+- إنشاء وإدارة خزائن متعددة
+- تتبع أرصدة كل خزينة
+- تسجيل المعاملات المالية (إيداع وسحب)
+- دعم عملات متعددة
+
+### 3. إدارة العملاء (Customer Management)
+- إضافة وتعديل بيانات العملاء
+- تحديد حدود الائتمان لكل عميل
+- تتبع أرصدة العملاء
+- عرض سجل المعاملات لكل عميل
+
+### 4. سجلات وكشوف العملاء (Customer Records & Statements)
+- تسجيل الفواتير وخطط الدفع
+- إنشاء كشوف حساب تفصيلية للعملاء
+- عرض المدين والدائن والرصيد لكل عملية
+- تصدير الكشوف للمراجعة
+
+### 5. الالتزامات المالية (Obligations)
+- إدارة وتتبع الالتزامات المالية
+- تحديد الالتزامات كمنجزة أو إعادة فتحها
+- متابعة المواعيد والمستحقات
+
+### 6. الرؤى الذكية بالذكاء الاصطناعي (AI-Powered Insights)
+- تحليل مالي ذكي مدعوم بـ Google Gemini
+- نصائح مالية مخصصة بناءً على بيانات الخزينة
+- رؤى تساعد في اتخاذ القرارات المالية
+
+### 7. التحليلات والتقارير (Analytics & Reporting)
+- تحليلات مفصلة لمؤشرات الأداء المالي (KPIs)
+- تفصيل المعاملات حسب النوع والسبب والطريقة
+- عرض الاتجاهات التاريخية
+- رسوم بيانية تفاعلية باستخدام Chart.js
+
+### 8. إدارة المعاملات (Transaction Management)
+- تسجيل المعاملات المالية المختلفة
+- دعم طرق دفع متعددة
+- إمكانية عكس المعاملات
+- تتبع كامل لسجل العمليات
+
+---
+
+## التقنيات المستخدمة
+
+### الواجهة الأمامية (Frontend)
+- **Next.js 16** - إطار عمل React مع App Router
+- **TypeScript** - للبرمجة الآمنة
+- **Tailwind CSS v4** - للتصميم
+- **shadcn/ui** - مكتبة مكونات واجهة المستخدم
+- **Radix UI** - مكونات أولية للوصول
+- **Lucide React** - أيقونات
+- **Chart.js** - رسوم بيانية تفاعلية
+
+### الواجهة الخلفية (Backend)
+- **Next.js Server Actions** - لمعالجة النماذج
+- **Zod v4** - للتحقق من صحة البيانات
+- **MongoDB** - قاعدة البيانات
+- **Mongoose v9** - ODM لـ MongoDB
+
+### الميزات التقنية
+- دعم كامل للغة العربية (RTL)
+- رسائل خطأ باللغة العربية
+- تصميم متجاوب لجميع الأجهزة
+- تخزين مؤقت ذكي للأداء
+
+---
+
+## هيكل المشروع
+
+```
+├── app/
+│   ├── (root)/
+│   │   ├── ai-insights/    # صفحة الرؤى الذكية
+│   │   ├── cash/           # إدارة الخزينة
+│   │   ├── customers/      # إدارة العملاء
+│   │   └── obligations/    # الالتزامات
+│   ├── api/                # نقاط API
+│   └── page.tsx            # لوحة التحكم الرئيسية
+├── components/
+│   ├── ui/                 # مكونات واجهة أساسية
+│   ├── forms/              # مكونات النماذج
+│   ├── layout/             # مكونات التخطيط
+│   └── pages/              # مكونات خاصة بالصفحات
+├── models/                 # نماذج قاعدة البيانات
+│   ├── Treasury.ts         # نموذج الخزينة
+│   ├── CashTransaction.ts  # نموذج المعاملات
+│   ├── Customer.ts         # نموذج العميل
+│   ├── CustomerRecord.ts   # نموذج سجلات العميل
+│   └── Obligation.ts       # نموذج الالتزامات
+├── lib/                    # مكتبات ووظائف مساعدة
+└── hooks/                  # React Hooks مخصصة
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## البدء السريع
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### المتطلبات
+- Node.js 18+
+- MongoDB
 
-## Learn More
+### التثبيت
 
-To learn more about Next.js, take a look at the following resources:
+1. استنساخ المشروع
+```bash
+git clone <repository-url>
+cd account-system
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. تثبيت الاعتماديات
+```bash
+npm install
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. إعداد متغيرات البيئة
+```bash
+# إنشاء ملف .env
+MONGODB_URI=your_mongodb_connection_string
+```
 
-## Deploy on Vercel
+4. تشغيل خادم التطوير
+```bash
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. افتح المتصفح على `http://localhost:5000`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## متغيرات البيئة المطلوبة
+
+| المتغير | الوصف |
+|---------|-------|
+| `MONGODB_URI` | سلسلة اتصال MongoDB |
+| `GEMINI_API_KEY` | مفتاح API لـ Google Gemini (للرؤى الذكية) |
+
+---
+
+## الترخيص
+
+هذا المشروع للاستخدام الخاص.
