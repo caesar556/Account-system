@@ -9,9 +9,15 @@ export class CustomerService {
     if (!customer) return 0;
 
     const openingBalance = (customer as any).openingBalance || 0;
+    const customerObjectId = new Types.ObjectId(customerId);
 
-    const result = await CashTransaction.aggregate([
-      { $match: { customerId: new Types.ObjectId(customerId) } },
+    const txResult = await CashTransaction.aggregate([
+      { 
+        $match: { 
+          customerId: customerObjectId,
+          deletedAt: { $exists: false },
+        } 
+      },
       {
         $group: {
           _id: null,
@@ -28,9 +34,45 @@ export class CustomerService {
       },
     ]);
 
-    const txBalance = result[0]?.txBalance || 0;
+    const recordResult = await CustomerRecord.aggregate([
+      {
+        $match: {
+          customerId: customerObjectId,
+          status: { $ne: "CANCELLED" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRecordAmount: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
 
-    return openingBalance + txBalance;
+    const recordPaymentResult = await CashTransaction.aggregate([
+      {
+        $match: {
+          customerId: customerObjectId,
+          referenceType: "CUSTOMER_RECORD",
+          type: "CREDIT",
+          deletedAt: { $exists: false },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalPaid: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const txBalance = txResult[0]?.txBalance || 0;
+    const totalRecordAmount = recordResult[0]?.totalRecordAmount || 0;
+    const totalPaidOnRecords = recordPaymentResult[0]?.totalPaid || 0;
+
+    const unpaidRecordBalance = totalRecordAmount - totalPaidOnRecords;
+
+    return openingBalance + txBalance + unpaidRecordBalance;
   }
 
   static async getCustomerSummary(customerId: string) {
@@ -119,7 +161,7 @@ export class CustomerService {
   static async getAllCustomersWithBalances() {
     const customers = await Customer.find({}).lean();
 
-    const balances = await CashTransaction.aggregate([
+    const txBalances = await CashTransaction.aggregate([
       {
         $match: {
           customerId: { $exists: true, $ne: null },
@@ -142,16 +184,59 @@ export class CustomerService {
       },
     ]);
 
-    const balanceMap = new Map(
-      balances.map((b) => [b._id.toString(), b.txBalance]),
+    const recordTotals = await CustomerRecord.aggregate([
+      {
+        $match: {
+          status: { $ne: "CANCELLED" },
+        },
+      },
+      {
+        $group: {
+          _id: "$customerId",
+          totalRecordAmount: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
+
+    const recordPayments = await CashTransaction.aggregate([
+      {
+        $match: {
+          referenceType: "CUSTOMER_RECORD",
+          type: "CREDIT",
+          deletedAt: { $exists: false },
+        },
+      },
+      {
+        $group: {
+          _id: "$customerId",
+          totalPaid: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const txBalanceMap = new Map(
+      txBalances.map((b) => [b._id.toString(), b.txBalance]),
+    );
+
+    const recordTotalMap = new Map(
+      recordTotals.map((r) => [r._id.toString(), r.totalRecordAmount]),
+    );
+
+    const recordPaymentMap = new Map(
+      recordPayments.map((p) => [p._id.toString(), p.totalPaid]),
     );
 
     return customers.map((customer) => {
-      const txBalance = balanceMap.get(customer._id.toString()) || 0;
+      const customerId = customer._id.toString();
+      const txBalance = txBalanceMap.get(customerId) || 0;
+      const totalRecordAmount = recordTotalMap.get(customerId) || 0;
+      const totalPaidOnRecords = recordPaymentMap.get(customerId) || 0;
+
+      const unpaidRecordBalance = totalRecordAmount - totalPaidOnRecords;
 
       return {
         ...customer,
-        currentBalance: (customer.openingBalance || 0) + txBalance,
+        currentBalance: (customer.openingBalance || 0) + txBalance + unpaidRecordBalance,
       };
     });
   }
