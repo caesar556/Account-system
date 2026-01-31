@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { TransactionService } from "@/lib/services/transactionService";
 
 export async function POST(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await dbConnect();
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { reason } = body;
 
