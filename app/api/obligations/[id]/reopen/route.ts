@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Obligation from "@/models/Obligation";
 
 export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  request: NextRequest,
+  { params }: { params: { id: string } },
 ) {
   try {
     await dbConnect();

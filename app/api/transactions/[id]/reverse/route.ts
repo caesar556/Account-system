@@ -3,14 +3,14 @@ import dbConnect from "@/lib/db";
 import { TransactionService } from "@/lib/services/transactionService";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  request: NextRequest,
+  { params }: { params: { id: string } },
 ) {
   try {
     await dbConnect();
 
     const { id } = await params;
-    const body = await req.json();
+    const body = await request.json();
     const { reason } = body;
 
     if (!reason || typeof reason !== "string") {
