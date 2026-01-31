@@ -13,6 +13,16 @@ import { Filter, Search, XCircle } from "lucide-react";
 import { useCustomers } from "@/hooks/data/useCustomers";
 
 export default function CustomerFilter() {
+  const  {
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    categoryFilter,
+    setCategoryFilter,
+    balanceFilter,
+    setBalanceFilter
+  } = useCustomers();
   return (
     <Card>
       <CardContent className="pt-6">
