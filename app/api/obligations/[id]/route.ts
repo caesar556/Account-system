@@ -4,12 +4,13 @@ import Obligation from "@/models/Obligation";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await dbConnect();
 
-    await Obligation.findByIdAndDelete(params.id);
+    const { id } = await params;
+    await Obligation.findByIdAndDelete(id);
 
     return NextResponse.json({ message: "Deleted" });
   } catch (error) {

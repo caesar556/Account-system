@@ -4,12 +4,13 @@ import Obligation from "@/models/Obligation";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await dbConnect();
 
-    const obligation = await Obligation.findById(params.id);
+    const { id } = await params;
+    const obligation = await Obligation.findById(id);
 
     if (!obligation) {
       return NextResponse.json(

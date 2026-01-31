@@ -44,79 +44,27 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import {
-  useGetObligationsQuery,
-  useMarkObligationDoneMutation,
-  useReopenObligationMutation,
-  useDeleteObligationMutation,
-} from "@/store/obligations/obligationsApi";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
-import { Obligation } from "@/lib/types/obligation";
+import { useObligations } from "@/hooks/data/useObligations";
 
 interface ObligationTableProps {
   filter: "all" | "OPEN" | "DONE" | "overdue";
 }
 
 export default function ObligationTable({ filter }: ObligationTableProps) {
-  const queryParams = filter === "all" 
-    ? undefined 
-    : filter === "overdue" 
-      ? { overdue: true } 
-      : { status: filter as "OPEN" | "DONE" };
-  
-  const { data: obligations = [], isLoading } = useGetObligationsQuery(queryParams);
-  const [markDone] = useMarkObligationDoneMutation();
-  const [reopenObligation] = useReopenObligationMutation();
-  const [deleteObligation] = useDeleteObligationMutation();
-  
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedObligation, setSelectedObligation] = useState<Obligation | null>(null);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ar-EG", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const isOverdue = (dueDate: string, status: string) => {
-    return status === "OPEN" && new Date(dueDate) < new Date();
-  };
-
-  const handleMarkDone = async (id: string) => {
-    try {
-      await markDone(id).unwrap();
-    } catch (error) {
-      console.error("Error marking obligation as done:", error);
-    }
-  };
-
-  const handleReopen = async (id: string) => {
-    try {
-      await reopenObligation(id).unwrap();
-    } catch (error) {
-      console.error("Error reopening obligation:", error);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedObligation) return;
-    try {
-      await deleteObligation(selectedObligation._id).unwrap();
-      setDeleteDialogOpen(false);
-      setSelectedObligation(null);
-    } catch (error) {
-      console.error("Error deleting obligation:", error);
-    }
-  };
-
-  const confirmDelete = (obligation: Obligation) => {
-    setSelectedObligation(obligation);
-    setDeleteDialogOpen(true);
-  };
-
+  const {
+    obligations,
+    isLoading,
+    formatDate,
+    isOverdue,
+    handleMarkDone,
+    handleReopen,
+    confirmDelete,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    handleDelete,
+    selectedObligation,
+  } = useObligations({ filter });
   if (isLoading) {
     return (
       <Card>
@@ -143,11 +91,14 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
               <CardTitle>قائمة الإلتزامات</CardTitle>
               <CardDescription className="mt-1">
                 {obligations.length} إلتزام
-                {filter !== "all" && ` - تصفية: ${
-                  filter === "OPEN" ? "مفتوحة" : 
-                  filter === "DONE" ? "مكتملة" : 
-                  "متأخرة"
-                }`}
+                {filter !== "all" &&
+                  ` - تصفية: ${
+                    filter === "OPEN"
+                      ? "مفتوحة"
+                      : filter === "DONE"
+                        ? "مكتملة"
+                        : "متأخرة"
+                  }`}
               </CardDescription>
             </div>
             <Badge variant="secondary" className="text-base px-3 py-1">
@@ -161,7 +112,9 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="text-right w-[250px]">الإلتزام</TableHead>
+                  <TableHead className="text-right w-[250px]">
+                    الإلتزام
+                  </TableHead>
                   <TableHead className="text-right">الطرف</TableHead>
                   <TableHead className="text-right">المبلغ</TableHead>
                   <TableHead className="text-right">تاريخ الاستحقاق</TableHead>
@@ -173,8 +126,11 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
               <TableBody>
                 {obligations.length > 0 ? (
                   obligations.map((obligation) => {
-                    const overdue = isOverdue(obligation.dueDate, obligation.status);
-                    
+                    const overdue = isOverdue(
+                      obligation.dueDate,
+                      obligation.status,
+                    );
+
                     return (
                       <TableRow
                         key={obligation._id}
@@ -208,13 +164,22 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
 
                         <TableCell>
                           <div className="flex items-center gap-2 text-sm">
-                            <Calendar className={`h-4 w-4 ${overdue ? "text-red-500" : "text-muted-foreground"}`} />
-                            <span className={overdue ? "text-red-600 font-semibold" : ""}>
+                            <Calendar
+                              className={`h-4 w-4 ${overdue ? "text-red-500" : "text-muted-foreground"}`}
+                            />
+                            <span
+                              className={
+                                overdue ? "text-red-600 font-semibold" : ""
+                              }
+                            >
                               {formatDate(obligation.dueDate)}
                             </span>
                           </div>
                           {overdue && (
-                            <Badge variant="destructive" className="mt-1 text-[10px]">
+                            <Badge
+                              variant="destructive"
+                              className="mt-1 text-[10px]"
+                            >
                               متأخر
                             </Badge>
                           )}
@@ -227,11 +192,12 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
                               مكتمل
                             </Badge>
                           ) : (
-                            <Badge 
-                              variant="outline" 
-                              className={overdue 
-                                ? "bg-red-50 text-red-700 border-red-200" 
-                                : "bg-blue-50 text-blue-700 border-blue-200"
+                            <Badge
+                              variant="outline"
+                              className={
+                                overdue
+                                  ? "bg-red-50 text-red-700 border-red-200"
+                                  : "bg-blue-50 text-blue-700 border-blue-200"
                               }
                             >
                               مفتوح
@@ -274,7 +240,7 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
                                   خيارات الإلتزام
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   className="text-red-600 text-right"
                                   onClick={() => confirmDelete(obligation)}
                                 >
@@ -318,7 +284,8 @@ export default function ObligationTable({ filter }: ObligationTableProps) {
               هل أنت متأكد من حذف هذا الإلتزام؟
             </AlertDialogTitle>
             <AlertDialogDescription className="text-right">
-              سيتم حذف الإلتزام &quot;{selectedObligation?.title}&quot; بشكل نهائي ولا يمكن التراجع عن هذا الإجراء.
+              سيتم حذف الإلتزام &quot;{selectedObligation?.title}&quot; بشكل
+              نهائي ولا يمكن التراجع عن هذا الإجراء.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2">
